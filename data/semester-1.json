@@ -1,0 +1,72 @@
+[
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"14.00-15.00",
+        "RUANGAN":"A404",
+        "KELAS":"MH - A (SIANG)",
+        "KODE DOSEN":"APD",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"14.00-15.00",
+        "RUANGAN":"A402",
+        "KELAS":"MH - B (SIANG)",
+        "KODE DOSEN":"BRS",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"16.00-17.00",
+        "RUANGAN":"A401",
+        "KELAS":"MH - C (SORE)",
+        "KODE DOSEN":"BRS",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"16.00-17.00",
+        "RUANGAN":"A501",
+        "KELAS":"MH - D (SORE)",
+        "KODE DOSEN":"APD",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Komunikasi dalam Praktik Kebidanan",
+        "JAM (WIB)":"16.00-17.00",
+        "RUANGAN":"Klinik",
+        "KELAS":"KB - A (SIANG)",
+        "KODE DOSEN":"RFG",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"16.00-17.00",
+        "RUANGAN":"A404",
+        "KELAS":"MH - A (SORE)",
+        "KODE DOSEN":"LVA",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    },
+    {
+        "HARI":"Senin",
+        "Tanggal":"02 Feb 2026",
+        "MATA KULIAH:":"Jasa Lingkungan dan Hutan Kota",
+        "JAM (WIB)":"16.00-17.00",
+        "RUANGAN":"A402",
+        "KELAS":"MH - B (SORE)",
+        "KODE DOSEN":"BRS",
+        "Link Server":"https://uas1.satyaterrabhinneka.ac.id"
+    }
+]

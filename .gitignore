@@ -1,0 +1,11 @@
+db.php
+config/db.php
+error_log
+# Backup and temporary files
+*.php_lama
+*.html_
+*.html-lama-*
+index.html_pakaidb
+index copy.html_
+index-1.html_
+index_lama.html_
