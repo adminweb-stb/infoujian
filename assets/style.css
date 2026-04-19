@@ -139,10 +139,16 @@ h1 {
 /* Info Bar */
 #infoHariTanggal {
     text-align: center;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     margin-bottom: 2rem;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+#infoHariTanggal i {
     color: var(--primary);
+    margin-right: 0.3rem;
 }
 
 /* --- Senior UI/UX Refinement & Global Reset --- */
