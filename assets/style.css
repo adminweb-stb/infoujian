@@ -280,7 +280,16 @@ footer {
 
 .table-row-premium {
     background: var(--card-bg);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+}
+
+.table-row-premium:hover {
+    transform: translateY(-3px);
+    background: var(--card-bg);
+    box-shadow: 0 12px 20px -10px var(--semester-glow);
+    z-index: 10;
+    position: relative;
 }
 
 .table-row-premium td {
@@ -321,9 +330,14 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
-    box-shadow: 0 10px 15px -10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     position: relative;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.exam-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px var(--semester-glow);
 }
 
 /* Card Status Variants (Strip stays Branded) */
