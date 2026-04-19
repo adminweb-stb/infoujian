@@ -33,6 +33,69 @@ if (!$is_locked && isset($_POST['password'])) {
 
 $is_logged_in = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
+// --- INTERNAL API FOR LIVE EDITOR ---
+if ($is_logged_in && isset($_GET['api'])) {
+    require_once 'db.php';
+    header('Content-Type: application/json');
+    $api = $_GET['api'];
+
+    try {
+        if ($api === 'get' && isset($_GET['sem'])) {
+            $sem = (int)$_GET['sem'];
+            $table = "semester_$sem";
+            $res = $conn->query("SELECT * FROM $table ORDER BY id ASC");
+            $data = [];
+            if ($res) {
+                while($row = $res->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            echo json_encode(['status' => 'success', 'data' => $data]);
+            exit;
+        }
+
+        if ($api === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)$_POST['id'];
+            $sem = (int)$_POST['sem'];
+            $table = "semester_$sem";
+            
+            $stmt = $conn->prepare("UPDATE $table SET hari=?, tanggal=?, sesi=?, matkul=?, jam=?, kelas=?, dosen=?, link_server=? WHERE id=?");
+            $stmt->bind_param("ssssssssi", $_POST['hari'], $_POST['tanggal'], $_POST['sesi'], $_POST['matkul'], $_POST['jam'], $_POST['kelas'], $_POST['dosen'], $_POST['link_server'], $id);
+            $stmt->execute();
+            
+            // Trigger Sync
+            define('INTERNAL_SYNC', true);
+            $semester = $sem; // Variable expected by sync_data logic
+            ob_start(); include 'sync_data.php'; ob_end_clean();
+            
+            echo json_encode(['status' => 'success', 'msg' => 'Data berhasil diupdate']);
+            exit;
+        }
+
+        if ($api === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)$_POST['id'];
+            $sem = (int)$_POST['sem'];
+            $table = "semester_$sem";
+            
+            $stmt = $conn->prepare("DELETE FROM $table WHERE id=?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            
+            // Trigger Sync
+            define('INTERNAL_SYNC', true);
+            $semester = $sem;
+            ob_start(); include 'sync_data.php'; ob_end_clean();
+            
+            echo json_encode(['status' => 'success', 'msg' => 'Data berhasil dihapus']);
+            exit;
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()]);
+        exit;
+    }
+}
+
 // If logged in, get statistics
 $stats = [];
 if ($is_logged_in) {
@@ -123,7 +186,10 @@ if ($is_logged_in) {
                                         <h5 class="mb-0 fw-bold">Semester <?php echo $sem; ?></h5>
                                         <p class="text-muted small mb-0">Total Data: <?php echo $stats[$sem]; ?></p>
                                     </div>
-                                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#upload-<?php echo $sem; ?>">Update Data</button>
+                                    <div>
+                                        <button class="btn btn-warning btn-sm me-2 fw-bold text-dark" onclick="openLiveEditor(<?php echo $sem; ?>)">Lihat & Edit Data</button>
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#upload-<?php echo $sem; ?>">Upload Baru</button>
+                                    </div>
                                 </div>
                                 
                                 <div class="collapse mt-3" id="upload-<?php echo $sem; ?>">
@@ -151,6 +217,223 @@ if ($is_logged_in) {
     </div>
 </div>
 
+<!-- LIVE EDITOR MODAL -->
+<div class="modal fade" id="liveEditorModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">Live Editor - Semester <span id="le-sem-badge"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 align-middle" id="le-table" style="font-size:0.85rem">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hari, Tgl</th>
+                                <th>Sesi/Jam</th>
+                                <th>Matkul</th>
+                                <th>Kls</th>
+                                <th>Dosen</th>
+                                <th>Link Server</th>
+                                <th width="120">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="le-tbody">
+                            <tr><td colspan="7" class="text-center p-4">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT FORM MODAL -->
+<div class="modal fade" id="editFormModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark">Edit Jadwal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="edit-id" name="id">
+                    <input type="hidden" id="edit-sem" name="sem">
+                    <div class="row g-2 mb-2">
+                        <div class="col-6"><label class="form-label small mb-1 fw-bold">Hari</label><input type="text" class="form-control form-control-sm" id="edit-hari" name="hari" required></div>
+                        <div class="col-6"><label class="form-label small mb-1 fw-bold">Tanggal</label><input type="text" class="form-control form-control-sm" id="edit-tanggal" name="tanggal" required></div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4"><label class="form-label small mb-1 fw-bold">Sesi</label><input type="text" class="form-control form-control-sm" id="edit-sesi" name="sesi"></div>
+                        <div class="col-8"><label class="form-label small mb-1 fw-bold">Jam</label><input type="text" class="form-control form-control-sm" id="edit-jam" name="jam" required></div>
+                    </div>
+                    <div class="mb-2"><label class="form-label small mb-1 fw-bold">Mata Kuliah</label><input type="text" class="form-control form-control-sm" id="edit-matkul" name="matkul" required></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4"><label class="form-label small mb-1 fw-bold">Kelas</label><input type="text" class="form-control form-control-sm" id="edit-kelas" name="kelas"></div>
+                        <div class="col-8"><label class="form-label small mb-1 fw-bold">Dosen</label><input type="text" class="form-control form-control-sm" id="edit-dosen" name="dosen"></div>
+                    </div>
+                    <div class="mb-4"><label class="form-label small mb-1 fw-bold">Link Server</label><input type="url" class="form-control form-control-sm" id="edit-link" name="link_server"></div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-danger px-3 fw-bold" onclick="deleteJadwal()">Hapus</button>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-sm btn-success px-4 fw-bold">Simpan</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let currentSem = null;
+let liveEditorModal, editFormModal;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const leModalEl = document.getElementById('liveEditorModal');
+    if (leModalEl) liveEditorModal = new bootstrap.Modal(leModalEl);
+    
+    const efModalEl = document.getElementById('editFormModal');
+    if (efModalEl) editFormModal = new bootstrap.Modal(efModalEl);
+    
+    const form = document.getElementById('editForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
+                
+                const res = await fetch('admin.php?api=update', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    editFormModal.hide();
+                    loadDataToTable(currentSem); // Refresh table
+                    alert('Data sukses disimpan dan website JSON telah ter-update otomatis!');
+                } else {
+                    alert('Error: ' + data.msg);
+                }
+                btn.innerHTML = originalText; btn.disabled = false;
+            } catch (err) {
+                alert('Gagal terhubung ke server');
+            }
+        });
+    }
+});
+
+async function openLiveEditor(sem) {
+    currentSem = sem;
+    document.getElementById('le-sem-badge').innerText = sem;
+    liveEditorModal.show();
+    await loadDataToTable(sem);
+}
+
+async function loadDataToTable(sem) {
+    const tbody = document.getElementById('le-tbody');
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Memuat data dari database...</td></tr>';
+    
+    try {
+        const res = await fetch(`admin.php?api=get&sem=${sem}`);
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            if (result.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-muted">Belum ada data jadwal. Silakan upload CSV terlebih dahulu.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            
+            result.data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="fw-bold">${item.hari || '-'}</div>
+                        <div class="small text-muted">${item.tanggal || '-'}</div>
+                    </td>
+                    <td>
+                        <div><span class="badge bg-secondary">Sesi ${item.sesi || '-'}</span></div>
+                        <div class="small mt-1 text-primary fw-bold">${item.jam || '-'}</div>
+                    </td>
+                    <td class="fw-bold">${item.matkul || '-'}</td>
+                    <td>${item.kelas || '-'}</td>
+                    <td>${item.dosen || '-'}</td>
+                    <td class="small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        <a href="${item.link_server}" target="_blank">${item.link_server}</a>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-warning fw-bold text-dark w-100" onclick="openEdit(${item.id}, ${sem})">Edit</button>
+                    </td>
+                `;
+                // Store actual data silently to avoid refetching on edit click
+                tr.dataset.json = JSON.stringify(item);
+                tbody.appendChild(tr);
+            });
+        }
+    } catch(err) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-danger">Gagal memuat data.</td></tr>';
+    }
+}
+
+function openEdit(id, sem) {
+    const tbody = document.getElementById('le-tbody');
+    const rows = tbody.querySelectorAll('tr');
+    let itemData = null;
+    rows.forEach(r => {
+        if (r.dataset.json) {
+            const data = JSON.parse(r.dataset.json);
+            if (data.id == id) itemData = data;
+        }
+    });
+    
+    if (itemData) {
+        document.getElementById('edit-id').value = itemData.id;
+        document.getElementById('edit-sem').value = sem;
+        document.getElementById('edit-hari').value = itemData.hari;
+        document.getElementById('edit-tanggal').value = itemData.tanggal;
+        document.getElementById('edit-sesi').value = itemData.sesi;
+        document.getElementById('edit-jam').value = itemData.jam;
+        document.getElementById('edit-matkul').value = itemData.matkul;
+        document.getElementById('edit-kelas').value = itemData.kelas;
+        document.getElementById('edit-dosen').value = itemData.dosen;
+        document.getElementById('edit-link').value = itemData.link_server;
+        
+        editFormModal.show();
+    }
+}
+
+async function deleteJadwal() {
+    if(!confirm("HAPUS DATA: Anda yakin ingin membuang jadwal ini secara permanen?")) return;
+    
+    const id = document.getElementById('edit-id').value;
+    const sem = document.getElementById('edit-sem').value;
+    
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('sem', sem);
+    
+    try {
+        const res = await fetch('admin.php?api=delete', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.status === 'success') {
+            editFormModal.hide();
+            loadDataToTable(currentSem);
+            alert('Jadwal berhasil dihapus dan JSON web telah tersinkron!');
+        } else {
+            alert('Error: ' + data.msg);
+        }
+    } catch(e) {
+        alert('Gagal terhubung ke server');
+    }
+}
+</script>
 </body>
 </html>
