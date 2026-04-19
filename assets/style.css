@@ -363,18 +363,19 @@ h1 {
 }
 
 @media (max-width: 768px) {
-    .table-container { 
+    #desktopContainer, .table-container, #desktopTable, thead, th { 
         display: none !important; 
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
     }
     #mobileCardList { 
         display: block !important; 
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
     }
-    
-    /* Mobile-specific adjustments for cards */
-    .container { 
-        padding: 1rem 0.5rem; 
-    }
-    header h1 { 
-        font-size: 1.5rem; 
-    }
+    .container { padding: 1rem 0.5rem; }
+    header h1 { font-size: 1.5rem; }
 }

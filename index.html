@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     
     <!-- Custom Style -->
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/style.css?v=177660666">
 </head>
 <body>
 
@@ -51,7 +51,7 @@
 
         <div id="tableWrapper" class="glass-card fade-in-up" style="display: none;">
             <!-- View 1: Desktop Table (Hidden on Mobile via CSS) -->
-            <div class="table-container">
+            <div id="desktopContainer" class="table-container">
                 <table id="desktopTable">
                     <thead>
                         <tr>
@@ -174,7 +174,8 @@
                     renderTable(currentData);
                     refreshStatus.innerText = "Gagal menyinkronkan. Menggunakan data cache.";
                 } else {
-                    ujianBody.innerHTML = '';
+                    desktopBody.innerHTML = '';
+                    mobileCardList.innerHTML = '';
                     tableWrapper.style.display = 'block';
                     noData.style.display = 'block';
                     refreshStatus.innerText = "Gagal memuat data. Mohon hubungi IT Support.";
@@ -219,9 +220,14 @@
             desktopBody.innerHTML = '';
             mobileCardList.innerHTML = '';
 
+            const desktopContainer = document.getElementById('desktopContainer');
             if (window.innerWidth > 768) {
+                desktopContainer.style.setProperty('display', 'block', 'important');
+                mobileCardList.style.setProperty('display', 'none', 'important');
                 renderDesktopView(filtered, currentTime);
             } else {
+                desktopContainer.style.setProperty('display', 'none', 'important');
+                mobileCardList.style.setProperty('display', 'block', 'important');
                 renderMobileView(filtered, currentTime);
             }
         };
@@ -346,7 +352,6 @@
                         status = "Selesai"; 
                         badgeClass = "status-ended";
                         clrClass = "card-ended row-ended";
-                    }
                 }
             }
             return { status, badgeClass, clrClass };
