@@ -75,9 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         include 'sync_data.php';
         ob_end_clean();
 
-        header("Location: admin.php?success=" . urlencode("Berhasil mengimpor $count data ke Semester $semester. Otomatis sinkronisasi JSON selesai."));
+        $_SESSION['success'] = "Berhasil mengimpor $count data ke Semester $semester. Otomatis sinkronisasi JSON selesai.";
+        header("Location: admin.php");
     } else {
-        header("Location: admin.php?error=Gagal membaca file CSV.");
+        $_SESSION['error'] = "Gagal membaca file CSV.";
+        header("Location: admin.php");
     }
 } else {
     header("Location: admin.php");

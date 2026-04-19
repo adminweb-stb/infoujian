@@ -48,15 +48,15 @@ if ($res) {
 
             <div class="glass-card p-0 overflow-hidden">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
                         <thead class="table-light">
                             <tr>
                                 <th>Waktu</th>
-                                <th>IP Address</th>
-                                <th>Perangkat</th>
-                                <th>Ujian</th>
+                                <th>IP & Lokasi / ISP</th>
+                                <th>Perangkat & OS</th>
+                                <th>Jenis Ujian</th>
                                 <th>Smt</th>
-                                <th>Aksi</th>
+                                <th>Aksi / Bot</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,24 +64,48 @@ if ($res) {
                                 <tr><td colspan="6" class="text-center p-5 text-muted">Belum ada data log tersimpan.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($logs as $log): ?>
-                                    <tr>
+                                    <?php 
+                                        $is_suspicious = ($log['country'] !== 'Indonesia' && $log['country'] !== 'Local/Private') || $log['is_bot']; 
+                                    ?>
+                                    <tr class="<?php echo $is_suspicious ? 'table-danger' : ''; ?>">
                                         <td class="fw-bold"><?php echo date('d/m H:i:s', strtotime($log['created_at'])); ?></td>
-                                        <td class="text-muted"><?php echo $log['ip_address']; ?></td>
                                         <td>
-                                            <?php if ($log['device_type'] == 'Mobile'): ?>
-                                                <span class="badge bg-info text-dark"><i class="bi bi-smartphone"></i> Mobile</span>
-                                            <?php elseif ($log['device_type'] == 'Tablet'): ?>
-                                                <span class="badge bg-warning text-dark"><i class="bi bi-tablet"></i> Tablet</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary"><i class="bi bi-pc-display"></i> PC</span>
-                                            <?php endif; ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <code class="<?php echo $is_suspicious ? 'text-danger fw-bold' : 'text-dark'; ?>"><?php echo $log['ip_address']; ?></code>
+                                                <?php if($log['country'] && $log['country'] !== 'Local/Private'): ?>
+                                                    <span class="small text-muted" title="<?php echo $log['country'] . ', ' . $log['city']; ?>">
+                                                        📍 <?php echo $log['city'] ?: $log['country']; ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.75rem;"><?php echo $log['isp'] ?: 'ISP Internal/Localhost'; ?></div>
                                         </td>
-                                        <td class="text-uppercase small fw-bold text-primary"><?php echo $log['exam_type']; ?></td>
-                                        <td class="text-center"><?php echo $log['semester'] ?: '-'; ?></td>
                                         <td>
-                                            <span class="badge <?php echo $log['action'] == 'page_load' ? 'bg-success' : 'bg-primary' ?> outline">
-                                                <?php echo $log['action'] == 'page_load' ? 'Buka Halaman' : 'Klik Tab' ?>
-                                            </span>
+                                            <div class="fw-bold">
+                                                <?php if ($log['device_type'] == 'Mobile'): ?>
+                                                    <i class="bi bi-smartphone text-info"></i>
+                                                <?php elseif ($log['device_type'] == 'Tablet'): ?>
+                                                    <i class="bi bi-tablet text-warning"></i>
+                                                <?php else: ?>
+                                                    <i class="bi bi-pc-display text-secondary"></i>
+                                                <?php endif; ?>
+                                                <?php echo $log['brand'] ?: 'Generic'; ?>
+                                            </div>
+                                            <div class="text-muted small"><?php echo $log['os'] ?: 'OS Unknown'; ?></div>
+                                        </td>
+                                        <td>
+                                            <span class="text-uppercase small fw-bold text-primary"><?php echo $log['exam_type']; ?></span>
+                                        </td>
+                                        <td class="text-center fw-bold"><?php echo $log['semester'] ?: '-'; ?></td>
+                                        <td>
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="badge <?php echo $log['action'] == 'page_load' ? 'bg-success' : 'bg-primary' ?> outline">
+                                                    <?php echo $log['action'] == 'page_load' ? 'Buka Halaman' : 'Klik Tab' ?>
+                                                </span>
+                                                <?php if($log['is_bot']): ?>
+                                                    <span class="badge bg-danger"><i class="bi bi-robot"></i> BOT/CRAWLER</span>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

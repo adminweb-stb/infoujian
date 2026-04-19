@@ -224,19 +224,19 @@ if ($is_logged_in) {
                     </div>
                 </div>
 
-                <?php if (isset($_GET['success'])): ?>
+                <?php if (isset($_SESSION['success'])): ?>
                     <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
-                        <strong><i class="bi bi-check-circle-fill"></i> Sukses!</strong> <?= htmlspecialchars($_GET['success']) ?>
+                        <strong><i class="bi bi-check-circle-fill"></i> Sukses!</strong> <?= htmlspecialchars($_SESSION['success']) ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                <?php endif; ?>
+                <?php unset($_SESSION['success']); endif; ?>
 
-                <?php if (isset($_GET['error'])): ?>
+                <?php if (isset($_SESSION['error'])): ?>
                     <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
-                        <strong><i class="bi bi-exclamation-triangle-fill"></i> Gagal!</strong> <?= htmlspecialchars($_GET['error']) ?>
+                        <strong><i class="bi bi-exclamation-triangle-fill"></i> Gagal!</strong> <?= htmlspecialchars($_SESSION['error']) ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                <?php endif; ?>
+                <?php unset($_SESSION['error']); endif; ?>
 
                 <!-- VISITOR ANALYTICS -->
                 <div class="row g-3 mb-4">
@@ -611,6 +611,12 @@ async function deleteJadwal() {
     } catch(e) {
         alert('Gagal terhubung ke server');
     }
+}
+
+// Clean URL from query strings (like ?success=...) for aesthetics
+if (window.history.replaceState) {
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({path: cleanUrl}, '', cleanUrl);
 }
 </script>
 </body>
