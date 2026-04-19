@@ -350,6 +350,8 @@ h1 {
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     z-index: 100;
+}
+
 /* --- Hard Switch: Truly Distinct Desktop vs Mobile Layouts --- */
 @media (min-width: 769px) {
     .table-container { 
