@@ -66,3 +66,7 @@ Options -Indexes
 # Direct gracefully to custom 404 page for missing files or directory listing attempts
 ErrorDocument 403 /ujian/404.html
 ErrorDocument 404 /ujian/404.html
+
+# Force 404 for direct directory access to /data/ for extra privacy
+RewriteEngine On
+RewriteRule ^data/?$ /ujian/404.html [R=404,L]
