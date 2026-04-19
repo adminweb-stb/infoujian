@@ -228,11 +228,11 @@
                 const dateRaw = `${item["hari"] || '-'}, ${item["tanggal"] || '-'}`;
                 let dateHeader = "";
                 if (isEvaluationMode && dateRaw !== lastDate) {
-                    dateHeader = `<tr><td colspan="6"><div class="date-separator">${dateRaw}</div></td></tr>`;
+                    dateHeader = `<tr><td colspan="5"><div class="date-separator">${dateRaw}</div></td></tr>`;
                     lastDate = dateRaw;
                 }
 
-                const { status, badgeClass, clrClass } = getStatus(item["jam"], currentTime);
+                const { status, badgeClass, clrClass } = getStatus(item["tanggal"], item["jam"], currentTime);
                 const serverUrl = item["link_server"] || "#";
                 const isBerlangsung = status === 'Berlangsung';
                 const isSelesai = status === 'Selesai';
@@ -273,7 +273,7 @@
                     lastDate = dateRaw;
                 }
 
-                const { status, badgeClass, clrClass } = getStatus(item["jam"], currentTime);
+                const { status, badgeClass, clrClass } = getStatus(item["tanggal"], item["jam"], currentTime);
                 const serverUrl = item["link_server"] || "#";
                 const isBerlangsung = status === 'Berlangsung';
                 const isSelesai = status === 'Selesai';
@@ -307,20 +307,45 @@
             }).join('');
         };
 
-        const getStatus = (jamRaw, currentTime) => {
+        const getStatus = (dateStr, jamRaw, currentTime) => {
             let status = "Mendatang";
             let badgeClass = "status-upcoming";
             let clrClass = "";
-            if (jamRaw && jamRaw.includes("-")) {
-                const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".")));
-                if (currentTime >= mulai && currentTime <= selesai) {
-                    status = "Berlangsung"; 
-                    badgeClass = "status-active";
-                    clrClass = "card-active row-active";
-                } else if (currentTime > selesai) {
-                    status = "Selesai"; 
-                    badgeClass = "status-ended";
-                    clrClass = "card-ended row-ended";
+
+            const now = new Date();
+            const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            
+            // Basic date comparison
+            const parseDate = (s) => {
+                const [d, m, y] = s.split('/').map(Number);
+                return new Date(y, m - 1, d);
+            };
+
+            const examDate = parseDate(dateStr);
+            const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const [d, m, y] = dateStr.split('/').map(Number);
+            const examDate = new Date(y, m - 1, d);
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            if (examDate > today) {
+                status = "Mendatang";
+            } else if (examDate < today) {
+                status = "Selesai";
+                badgeClass = "status-ended";
+                clrClass = "card-ended row-ended";
+            } else {
+                // Same day: Check time
+                if (jamRaw && jamRaw.includes("-")) {
+                    const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".").replace(",", ".")));
+                    if (currentTime >= mulai && currentTime <= selesai) {
+                        status = "Berlangsung"; 
+                        badgeClass = "status-active";
+                        clrClass = "card-active row-active";
+                    } else if (currentTime > selesai) {
+                        status = "Selesai"; 
+                        badgeClass = "status-ended";
+                        clrClass = "card-ended row-ended";
+                    }
                 }
             }
             return { status, badgeClass, clrClass };
