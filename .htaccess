@@ -15,19 +15,13 @@
 </IfModule>
 
 # --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS ---
-<FilesMatch "\.(json|csv|log|sql|env|bak|old|lama)$">
+<FilesMatch "\.(csv|log|sql|env|bak|old|lama)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# Exception: Allow the static JSON data files that power the app (served by JS fetch)
-<Files "semester-2.json">
-    Allow from all
-</Files>
-<Files "semester-4.json">
-    Allow from all
-</Files>
-<Files "semester-6.json">
+# Exception: Allow admin to download the CSV template
+<Files "template_jadwal.csv">
     Allow from all
 </Files>
 
