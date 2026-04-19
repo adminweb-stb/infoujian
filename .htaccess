@@ -66,3 +66,8 @@ Options -Indexes
     Order Allow,Deny
     Deny from all
 </Files>
+
+# --- 7. CUSTOM ERROR HANDLING (403/404) ---
+# Direct gracefully to custom 404 page for missing files or directory listing attempts
+ErrorDocument 403 /ujian/404.html
+ErrorDocument 404 /ujian/404.html
