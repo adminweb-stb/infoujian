@@ -113,6 +113,11 @@ if ($is_logged_in && isset($_GET['api'])) {
             echo json_encode(['status' => 'success', 'msg' => 'Data berhasil dihapus']);
             exit;
         }
+        if ($api === 'clear_logs' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn->query("TRUNCATE TABLE visitor_logs");
+            echo json_encode(['status' => 'success', 'msg' => 'Log kunjungan berhasil dibersihkan']);
+            exit;
+        }
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'msg' => $e->getMessage()]);
@@ -132,6 +137,29 @@ if ($is_logged_in) {
             $stats[$sem] = $res->fetch_assoc()['total'];
         } else {
             $stats[$sem] = "Tabel belum dibuat";
+        }
+    }
+
+    // --- VISITOR ANALYTICS AGGREGATION ---
+    $logs = [
+        'today' => 0,
+        'total' => 0,
+        'devices' => ['Mobile' => 0, 'Desktop' => 0, 'Tablet' => 0]
+    ];
+    $check_log_table = $conn->query("SHOW TABLES LIKE 'visitor_logs'");
+    if ($check_log_table->num_rows > 0) {
+        // Today
+        $res = $conn->query("SELECT COUNT(*) as total FROM visitor_logs WHERE DATE(created_at) = CURDATE()");
+        $logs['today'] = $res->fetch_assoc()['total'];
+        
+        // Total
+        $res = $conn->query("SELECT COUNT(*) as total FROM visitor_logs");
+        $logs['total'] = $res->fetch_assoc()['total'];
+
+        // Devices
+        $res = $conn->query("SELECT device_type, COUNT(*) as total FROM visitor_logs GROUP BY device_type");
+        while($row = $res->fetch_assoc()) {
+            $logs['devices'][$row['device_type'] ?? 'Desktop'] = $row['total'];
         }
     }
 }
@@ -190,7 +218,10 @@ if ($is_logged_in) {
                 <!-- DASHBOARD -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold">Dashboard Admin</h2>
-                    <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
+                    <div>
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="clearLogs()">Hapus Log</button>
+                        <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
+                    </div>
                 </div>
 
                 <?php if (isset($_GET['success'])): ?>
@@ -206,6 +237,31 @@ if ($is_logged_in) {
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
+
+                <!-- VISITOR ANALYTICS -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="glass-card p-3 text-center border-0 bg-white">
+                            <h6 class="text-muted small fw-bold">PENGUNJUNG HARI INI</h6>
+                            <div class="stats-num"><?php echo number_format($logs['today']); ?></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-card p-3 text-center border-0 bg-white">
+                            <h6 class="text-muted small fw-bold">TOTAL KUNJUNGAN</h6>
+                            <div class="stats-num text-success"><?php echo number_format($logs['total']); ?></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-card p-3 border-0 bg-white h-100 d-flex flex-column justify-content-center">
+                            <h6 class="text-muted small fw-bold mb-2">PERANGKAT</h6>
+                            <div class="d-flex justify-content-between small">
+                                <span>📱 Mobile: <strong><?php echo $logs['devices']['Mobile']; ?></strong></span>
+                                <span>💻 PC: <strong><?php echo ($logs['devices']['Desktop'] + $logs['devices']['Tablet']); ?></strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- MASTER CONFIG SETTINGS -->
                 <div class="glass-card p-4 mb-4 border-primary" style="border-left: 5px solid #4f46e5 !important;">
@@ -433,6 +489,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+async function clearLogs() {
+    if (!confirm('Apakah Anda yakin ingin menghapus semua data log kunjungan? Tindakan ini tidak dapat dibatalkan.')) return;
+    try {
+        const res = await fetch('admin.php?api=clear_logs', { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'success') {
+            alert(data.msg);
+            window.location.reload();
+        }
+    } catch(err) {
+        alert('Gagal membersihkan log.');
+    }
+}
 
 async function openLiveEditor(sem) {
     currentSem = sem;

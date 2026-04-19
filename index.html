@@ -472,6 +472,22 @@
             }, 300);
         });
 
+        // --- Analytics System ---
+        const logEvent = (action, sem) => {
+            try {
+                const formData = new FormData();
+                formData.append('action', action);
+                formData.append('exam_type', activeExam);
+                formData.append('semester', sem || 0);
+                
+                fetch('api_logger.php', {
+                    method: 'POST',
+                    body: formData,
+                    keepalive: true // Crucial for "fire and forget" tracking
+                }).catch(() => {}); // Silence errors
+            } catch (e) {}
+        };
+
         // Bootstrap App
         const initApp = async () => {
             updateInfoBar();
@@ -511,6 +527,7 @@
                     document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
                     e.target.classList.add('active');
                     loadData(sem);
+                    logEvent('tab_click', sem);
                 });
                 
                 tabsContainer.appendChild(a);
@@ -519,6 +536,7 @@
             // Load Initial Data
             if (semesters.length > 0) {
                 loadData(semesters[0]);
+                logEvent('page_load', semesters[0]);
             }
         };
 
