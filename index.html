@@ -169,14 +169,7 @@
             const currentTime = now.getHours() + (now.getMinutes() / 60);
             const hariIni = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][now.getDay()].toLowerCase();
 
-            // Filter for today's exams only (Optional logic - User can change this to show all if needed)
-            // For now, let's keep it consistent with previous functionality: Filter by today
-            const filtered = data.filter(item => {
-                let h = (item["hari"] || item["HARI"] || "").split(',')[0].trim().toLowerCase().replace("'", "");
-                return h === hariIni || h === "hari ini";
-            });
-
-            if (data.length === 0 || (filtered.length === 0 && searchInput.value === "")) {
+            if (data.length === 0) {
                 tableWrapper.style.display = 'block';
                 noData.style.display = 'block';
                 ujianBody.innerHTML = '';
@@ -186,7 +179,10 @@
             noData.style.display = 'none';
             tableWrapper.style.display = 'block';
             
-            ujianBody.innerHTML = (searchInput.value ? data : filtered).map((item, index) => {
+            // Show all data or filtered by search Term
+            const displayData = searchInput.value ? data : data; 
+
+            ujianBody.innerHTML = displayData.map((item, index) => {
                 const jamRaw = item["jam"] || item["JAM (WIB)"] || "";
                 let status = "Upcoming";
                 let badgeClass = "status-upcoming";
