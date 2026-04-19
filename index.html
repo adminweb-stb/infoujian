@@ -43,6 +43,12 @@
             <input type="text" id="searchInput" class="search-input" placeholder="Cari NIM, Nama, Mata Kuliah, atau Dosen...">
         </div>
 
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button id="evaluationToggle" class="btn-eval">
+                <i class="bi bi-eye"></i> Tampilkan Semua Hari (Mode Evaluasi)
+            </button>
+        </div>
+
         <div id="tableWrapper" class="glass-card fade-in-up" style="display: none;">
             <div class="table-responsive">
                 <table>
@@ -88,6 +94,8 @@
         const searchInput = document.getElementById('searchInput');
         const refreshStatus = document.getElementById('refreshStatus');
         const themeToggle = document.getElementById('themeToggle');
+        const evaluationToggle = document.getElementById('evaluationToggle');
+        let isEvaluationMode = false;
 
         // Initialize Theme
         if (localStorage.getItem('theme') === 'dark') {
@@ -105,6 +113,15 @@
                 localStorage.setItem('theme', 'dark');
                 themeToggle.innerHTML = '<i class="bi bi-sun"></i>';
             }
+        });
+
+        evaluationToggle.addEventListener('click', () => {
+            isEvaluationMode = !isEvaluationMode;
+            evaluationToggle.classList.toggle('active');
+            evaluationToggle.innerHTML = isEvaluationMode ? 
+                '<i class="bi bi-eye-slash"></i> Sembunyikan Hari Lain' : 
+                '<i class="bi bi-eye"></i> Tampilkan Semua Hari (Mode Evaluasi)';
+            renderTable(currentData);
         });
 
         // Set Current Date
@@ -168,7 +185,27 @@
             const currentTime = now.getHours() + (now.getMinutes() / 60);
             const hariIni = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][now.getDay()].toLowerCase();
 
-            if (data.length === 0) {
+            // Filter data
+            let filtered = data;
+            
+            // 1. Filter by Search input
+            const term = searchInput.value.toLowerCase();
+            if (term) {
+                filtered = data.filter(i => 
+                    (i["matkul"] || "").toLowerCase().includes(term) ||
+                    (i["kelas"] || "").toLowerCase().includes(term) ||
+                    (i["dosen"] || "").toLowerCase().includes(term)
+                );
+            } 
+            // 2. Filter by Today (Only if NOT in evaluation mode and NO search active)
+            else if (!isEvaluationMode) {
+                filtered = data.filter(item => {
+                    let h = (item["hari"] || "").split(',')[0].trim().toLowerCase();
+                    return h === hariIni || h === "hari ini";
+                });
+            }
+
+            if (filtered.length === 0) {
                 tableWrapper.style.display = 'block';
                 noData.style.display = 'block';
                 ujianBody.innerHTML = '';
@@ -178,20 +215,17 @@
             noData.style.display = 'none';
             tableWrapper.style.display = 'block';
             
-            // Show all data or filtered by search Term
-            const displayData = searchInput.value ? data : data; 
-
             let lastDate = "";
-            ujianBody.innerHTML = displayData.map((item, index) => {
-                const jamRaw = item["jam"] || item["JAM (WIB)"] || "";
+            ujianBody.innerHTML = filtered.map((item, index) => {
+                const jamRaw = item["jam"] || "";
                 const dateRaw = `${item["hari"] || '-'}, ${item["tanggal"] || '-'}`;
                 
                 let dateHeader = "";
-                if (dateRaw !== lastDate) {
+                if (isEvaluationMode && dateRaw !== lastDate) {
                     dateHeader = `
                         <tr class="date-group-header">
                             <td colspan="6">
-                                <i class="bi bi-calendar3"></i> &nbsp; ${dateRaw}
+                                <i class="bi bi-calendar-check"></i> &nbsp; ${dateRaw}
                             </td>
                         </tr>
                     `;
@@ -214,30 +248,40 @@
                     }
                 }
 
-                const serverUrl = item["link_server"] || item["Link Server"] || "#";
+                const serverUrl = item["link_server"] || "#";
 
                 return `
                     ${dateHeader}
                     <tr class="exam-row ${status === 'Selesai' ? 'row-ended' : ''}">
                         <td data-label="Sesi">
-                            <div class="sesi-badge">${item["sesi"] || index + 1}</div>
+                            <div class="sesi-pill">${item["sesi"] || index + 1}</div>
                         </td>
                         <td data-label="Jam & Status">
-                            <span class="jam-text">${jamRaw}</span><br>
+                            <div class="time-container">
+                                <i class="bi bi-clock"></i> ${jamRaw}
+                            </div>
                             <span class="status-badge ${badgeClass}">${status}</span>
                         </td>
-                        <td data-label="Kelas">${item["kelas"] || '-'}</td>
-                        <td data-label="Mata Kuliah">
-                            <div class="matkul-text">${item["matkul"] || item["MATAKULIAH"] || '-'}</div>
+                        <td data-label="Kelas">
+                            <div class="detail-item">
+                                <i class="bi bi-door-open"></i> ${item["kelas"] || '-'}
+                            </div>
                         </td>
-                        <td data-label="Dosen">${item["dosen"] || '-'}</td>
+                        <td data-label="Mata Kuliah">
+                            <div class="premium-matkul">${item["matkul"] || '-'}</div>
+                        </td>
+                        <td data-label="Dosen">
+                            <div class="detail-item">
+                                <i class="bi bi-person-badge"></i> ${item["dosen"] || '-'}
+                            </div>
+                        </td>
                         <td data-label="Aksi">
                             ${status === "Berlangsung" ? 
-                                `<a href="${serverUrl}" target="_blank" class="server-link">
-                                    <i class="bi bi-box-arrow-up-right"></i> MASUK UJIAN
+                                `<a href="${serverUrl}" target="_blank" class="server-link shadow-glow">
+                                    <i class="bi bi-lightning-fill"></i> MASUK UJIAN
                                  </a>` : 
                                 `<button class="server-link btn-locked" disabled>
-                                    <i class="bi bi-lock"></i> ${status === "Selesai" ? "SELESAI" : "TERKUNCI"}
+                                    <i class="bi bi-lock-fill"></i> ${status === "Selesai" ? "SELESAI" : "TERKUNCI"}
                                  </button>`
                             }
                         </td>
