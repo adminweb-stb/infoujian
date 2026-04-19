@@ -33,16 +33,40 @@ if (!$is_locked && isset($_POST['password'])) {
 
 $is_logged_in = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
-// --- INTERNAL API FOR LIVE EDITOR ---
+// --- MASTER CONFIGURATION ---
+$config_path = __DIR__ . '/data/config.json';
+if (file_exists($config_path)) {
+    $config = json_decode(file_get_contents($config_path), true);
+} else {
+    $config = ['active_exam' => 'uts', 'active_period' => 'ganjil'];
+}
+$active_exam = $config['active_exam'] ?? 'uts';
+$active_period = $config['active_period'] ?? 'ganjil';
+$sem_array = ($active_period === 'ganjil') ? [1, 3, 5, 7] : [2, 4, 6, 8];
+
+// --- INTERNAL API FOR LIVE EDITOR & SETTINGS ---
 if ($is_logged_in && isset($_GET['api'])) {
     require_once 'db.php';
     header('Content-Type: application/json');
     $api = $_GET['api'];
 
     try {
+        if ($api === 'save_config' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $new_exam = $_POST['active_exam'] ?? 'uts';
+            $new_label = $_POST['active_exam_label'] ?? 'Ujian Tengah Semester (UTS)';
+            $new_period = $_POST['active_period'] ?? 'ganjil';
+            file_put_contents($config_path, json_encode([
+                'active_exam' => $new_exam,
+                'active_exam_label' => $new_label,
+                'active_period' => $new_period
+            ], JSON_PRETTY_PRINT));
+            echo json_encode(['status' => 'success']);
+            exit;
+        }
+
         if ($api === 'get' && isset($_GET['sem'])) {
             $sem = (int)$_GET['sem'];
-            $table = "semester_$sem";
+            $table = "{$active_exam}_semester_$sem";
             $res = $conn->query("SELECT * FROM $table ORDER BY id ASC");
             $data = [];
             if ($res) {
@@ -57,7 +81,7 @@ if ($is_logged_in && isset($_GET['api'])) {
         if ($api === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)$_POST['id'];
             $sem = (int)$_POST['sem'];
-            $table = "semester_$sem";
+            $table = "{$active_exam}_semester_$sem";
             
             $stmt = $conn->prepare("UPDATE $table SET hari=?, tanggal=?, sesi=?, matkul=?, jam=?, kelas=?, dosen=?, link_server=? WHERE id=?");
             $stmt->bind_param("ssssssssi", $_POST['hari'], $_POST['tanggal'], $_POST['sesi'], $_POST['matkul'], $_POST['jam'], $_POST['kelas'], $_POST['dosen'], $_POST['link_server'], $id);
@@ -75,7 +99,7 @@ if ($is_logged_in && isset($_GET['api'])) {
         if ($api === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)$_POST['id'];
             $sem = (int)$_POST['sem'];
-            $table = "semester_$sem";
+            $table = "{$active_exam}_semester_$sem";
             
             $stmt = $conn->prepare("DELETE FROM $table WHERE id=?");
             $stmt->bind_param("i", $id);
@@ -100,8 +124,8 @@ if ($is_logged_in && isset($_GET['api'])) {
 $stats = [];
 if ($is_logged_in) {
     require_once 'db.php';
-    foreach ([2, 4, 6] as $sem) {
-        $table = "semester_$sem";
+    foreach ($sem_array as $sem) {
+        $table = "{$active_exam}_semester_$sem";
         $check = $conn->query("SHOW TABLES LIKE '$table'");
         if ($check->num_rows > 0) {
             $res = $conn->query("SELECT COUNT(*) as total FROM $table");
@@ -118,6 +142,7 @@ if ($is_logged_in) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal | Jadwal Ujian</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -165,6 +190,37 @@ if ($is_logged_in) {
                     <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
                 </div>
 
+                <!-- MASTER CONFIG SETTINGS -->
+                <div class="glass-card p-4 mb-4 border-primary" style="border-left: 5px solid #4f46e5 !important;">
+                    <h5 class="fw-bold text-primary mb-3">⚙️ Pengaturan Ujian Publik Teraktif</h5>
+                    <form id="configForm">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Jenis Ujian</label>
+                                <select class="form-select" id="cfg-exam" name="active_exam">
+                                    <option value="uts" <?php if($active_exam=='uts') echo 'selected'; ?>>Ujian Tengah Semester (UTS)</option>
+                                    <option value="uts_susulan" <?php if($active_exam=='uts_susulan') echo 'selected'; ?>>Susulan UTS</option>
+                                    <option value="uas" <?php if($active_exam=='uas') echo 'selected'; ?>>Ujian Akhir Semester (UAS)</option>
+                                    <option value="uas_susulan" <?php if($active_exam=='uas_susulan') echo 'selected'; ?>>Susulan UAS</option>
+                                    <option value="remedial" <?php if($active_exam=='remedial') echo 'selected'; ?>>Remedial</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Periode Semester</label>
+                                <select class="form-select" id="cfg-period" name="active_period">
+                                    <option value="ganjil" <?php if($active_period=='ganjil') echo 'selected'; ?>>Semester Ganjil (1, 3, 5, 7)</option>
+                                    <option value="genap" <?php if($active_period=='genap') echo 'selected'; ?>>Semester Genap (2, 4, 6, 8)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="hidden" id="cfg-label" name="active_exam_label">
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">Simpan Pengaturan</button>
+                            </div>
+                        </div>
+                        <div class="form-text mt-2 text-danger small">⚠️ Perhatian: Menyimpan pengaturan ini mengubah Judul Web dan Sinkronisasi Jadwal bagi seluruh Mahasiswa secara Instan.</div>
+                    </form>
+                </div>
+
                 <!-- DOWNLOAD TEMPLATE -->
                 <div class="alert alert-info glass-card mb-4 border-0">
                     <h5 class="fw-bold mb-2">Instruksi Update:</h5>
@@ -178,7 +234,7 @@ if ($is_logged_in) {
 
                 <!-- SEMESTER CARDS -->
                 <div class="row g-3">
-                    <?php foreach ([2, 4, 6] as $sem): ?>
+                    <?php foreach ($sem_array as $sem): ?>
                         <div class="col-12">
                             <div class="glass-card p-4">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -299,7 +355,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (leModalEl) liveEditorModal = new bootstrap.Modal(leModalEl);
     
     const efModalEl = document.getElementById('editFormModal');
-    if (efModalEl) editFormModal = new bootstrap.Modal(efModalEl);
+    if (efModalEl) {
+        editFormModal = new bootstrap.Modal(efModalEl);
+        // Handle nested modal UX: Auto-show the background table when edit modal closes
+        efModalEl.addEventListener('hidden.bs.modal', function () {
+            if (currentSem) liveEditorModal.show();
+        });
+    }
     
     const form = document.getElementById('editForm');
     if (form) {
@@ -326,6 +388,31 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 alert('Gagal terhubung ke server');
             }
+        });
+    }
+
+    const configForm = document.getElementById('configForm');
+    if (configForm) {
+        configForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
+            
+            const sel = document.getElementById('cfg-exam');
+            document.getElementById('cfg-label').value = sel.options[sel.selectedIndex].text;
+            
+            const formData = new FormData(e.target);
+            try {
+                const res = await fetch('admin.php?api=save_config', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert('Pengaturan Global sukses disimpan!');
+                    window.location.reload();
+                }
+            } catch(err) {
+                alert('Gagal menyimpan pengaturan.');
+            }
+            btn.innerHTML = 'Simpan Pengaturan'; btn.disabled = false;
         });
     }
 });
@@ -406,6 +493,7 @@ function openEdit(id, sem) {
         document.getElementById('edit-dosen').value = itemData.dosen;
         document.getElementById('edit-link').value = itemData.link_server;
         
+        liveEditorModal.hide(); // Hide background modal to reduce visual clutter
         editFormModal.show();
     }
 }
@@ -424,7 +512,7 @@ async function deleteJadwal() {
         const res = await fetch('admin.php?api=delete', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.status === 'success') {
-            editFormModal.hide();
+            editFormModal.hide(); // Event listener will trigger liveEditorModal.show()
             loadDataToTable(currentSem);
             alert('Jadwal berhasil dihapus dan JSON web telah tersinkron!');
         } else {

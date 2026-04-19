@@ -44,9 +44,7 @@
         <div id="infoHariTanggal" style="display: none;"></div>
 
         <nav class="nav-tabs" id="semesterTabs">
-            <a href="#" class="nav-link active" data-semester="2">Semester 2</a>
-            <a href="#" class="nav-link" data-semester="4">Semester 4</a>
-            <a href="#" class="nav-link" data-semester="6">Semester 6</a>
+            <a href="#" class="nav-link active">Smt -</a>
         </nav>
 
         <div class="search-container">
@@ -96,7 +94,9 @@
         // Core Constants
         const CACHE_TIME = 5 * 60 * 1000; // 5 minutes cache
         let currentData = [];
-        let currentSemester = 1;
+        let currentSemester = null;
+        let activeExam = 'uts';
+        let activePeriod = 'ganjil';
 
         // UI Elements
         const desktopBody = document.getElementById('desktopBody');
@@ -212,7 +212,7 @@
 
             try {
                 refreshStatus.innerText = "Memperbarui data...";
-                const response = await fetch(`data/semester-${semester}.json?v=${now}`);
+                const response = await fetch(`data/${activeExam}_semester-${semester}.json?v=${now}`);
                 if (!response.ok) throw new Error('File data tidak ditemukan');
                 
                 const data = await response.json();
@@ -453,16 +453,6 @@
 
         window.addEventListener('resize', () => renderTable(currentData));
 
-        // Tab Handling
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                loadData(link.dataset.semester);
-            });
-        });
-
         // Search Handling (Debounced)
         let searchTimeout;
         searchInput.addEventListener('input', (e) => {
@@ -482,9 +472,57 @@
             }, 300);
         });
 
-        // Bootstrap
-        updateInfoBar();
-        loadData(2);
+        // Bootstrap App
+        const initApp = async () => {
+            updateInfoBar();
+            showSkeleton();
+            
+            try {
+                // Fetch Master Config
+                const qs = '?v=' + Date.now();
+                const res = await fetch('data/config.json' + qs);
+                const config = await res.json();
+                activeExam = config.active_exam || 'uts';
+                activePeriod = config.active_period || 'ganjil';
+                
+                // Update UI Title
+                const titleLabel = config.active_exam_label || "Jadwal Ujian";
+                document.querySelector('.header-text h1').textContent = titleLabel;
+                document.title = titleLabel + " | ST Bhinneka";
+            } catch (e) {
+                console.error("Config missing, falling back to defaults.");
+            }
+
+            // Generate Nav Tabs Dynamically
+            const tabsContainer = document.getElementById('semesterTabs');
+            tabsContainer.innerHTML = '';
+            const semesters = (activePeriod === 'ganjil') ? [1, 3, 5, 7] : [2, 4, 6, 8];
+            
+            semesters.forEach((sem, idx) => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.className = "nav-link";
+                if (idx === 0) a.classList.add('active'); // First tab active initially
+                a.dataset.semester = sem;
+                a.textContent = "Semester " + sem;
+                
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+                    e.target.classList.add('active');
+                    loadData(sem);
+                });
+                
+                tabsContainer.appendChild(a);
+            });
+
+            // Load Initial Data
+            if (semesters.length > 0) {
+                loadData(semesters[0]);
+            }
+        };
+
+        initApp();
 
     </script>
 </body>

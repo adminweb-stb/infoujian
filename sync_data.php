@@ -18,17 +18,20 @@ if (!defined('INTERNAL_SYNC')) {
 header('Content-Type: text/plain');
 require_once 'db.php';
 
-// Configuration: Mapping semesters to table names
-$table_map = [
-    '1' => 'semester_1',
-    '2' => 'semester_2',
-    '3' => 'semester_3',
-    '4' => 'semester_4',
-    '5' => 'semester_5',
-    '6' => 'semester_6',
-    '7' => 'semester_7',
-    '8' => 'semester_8'
-];
+// --- MASTER CONFIGURATION ---
+$config_path = __DIR__ . '/data/config.json';
+if (file_exists($config_path)) {
+    $config = json_decode(file_get_contents($config_path), true);
+} else {
+    $config = ['active_exam' => 'uts', 'active_period' => 'ganjil'];
+}
+$active_exam = $config['active_exam'] ?? 'uts';
+
+// Configuration: Mapping semesters to table names dynamically
+$table_map = [];
+foreach(range(1, 8) as $sem) {
+    $table_map[$sem] = "{$active_exam}_semester_{$sem}";
+}
 
 $output_dir = __DIR__ . '/data/';
 if (!is_dir($output_dir)) {
@@ -57,9 +60,9 @@ foreach ($table_map as $semester => $table_name) {
             $data[] = $row;
         }
 
-        $json_file = $output_dir . "semester-$semester.json";
+        $json_file = $output_dir . "{$active_exam}_semester-$semester.json";
         if (file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT))) {
-            echo "Success! Saved to data/semester-$semester.json (" . count($data) . " rows)\n";
+            echo "Success! Saved to data/{$active_exam}_semester-$semester.json (" . count($data) . " rows)\n";
         } else {
             echo "Error writing file.\n";
         }

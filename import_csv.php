@@ -6,8 +6,18 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     require_once 'db.php';
+    
+    // --- MASTER CONFIGURATION ---
+    $config_path = __DIR__ . '/data/config.json';
+    if (file_exists($config_path)) {
+        $config = json_decode(file_get_contents($config_path), true);
+    } else {
+        $config = ['active_exam' => 'uts', 'active_period' => 'ganjil'];
+    }
+    $active_exam = $config['active_exam'] ?? 'uts';
+
     $semester = (int)$_POST['semester'];
-    $table = "semester_$semester";
+    $table = "{$active_exam}_semester_$semester";
     
     $file = $_FILES['csv_file']['tmp_name'];
     $handle = fopen($file, "r");
