@@ -662,10 +662,10 @@ footer {
     }
     .container { padding: 1rem 0.5rem; }
     
-    .header-main { margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .header-brand img { width: 60px !important; margin-bottom: 0 !important; }
-    .header-text h1 { font-size: 1.3rem !important; }
-    .header-text p { display: none; } /* Hide subtitle on mobile for space */
+    .header-main { margin-bottom: 2rem; }
+    .header-brand img { width: 80px !important; margin-bottom: 0 !important; }
+    .header-text h1 { font-size: 1.5rem !important; }
+    .header-text p { display: block; font-size: 0.85rem; } 
     
     .nav-tabs { gap: 0.25rem; margin-bottom: 1rem; }
     .nav-link { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
