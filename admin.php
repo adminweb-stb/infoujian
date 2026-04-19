@@ -169,7 +169,7 @@ if ($is_logged_in) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal | Jadwal Ujian</title>
+    <title>Admin Dashboard | Jadwal Ujian</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -193,7 +193,7 @@ if ($is_logged_in) {
                 <div class="glass-card p-5 mt-5">
                     <div class="text-center mb-4">
                         <img src="images/logo.png" alt="logo" width="80" class="mb-3">
-                        <h2 class="fw-bold">Admin Portal</h2>
+                        <h2 class="fw-bold">Admin Dashboard</h2>
                         <p class="text-muted">Masukkan password untuk mengelola jadwal.</p>
                     </div>
                     
@@ -217,7 +217,7 @@ if ($is_logged_in) {
             <div class="col-md-11 col-lg-10">
                 <!-- DASHBOARD -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">Dashboard Admin</h2>
+                    <h2 class="fw-bold">Admin Panel</h2>
                     <div>
                         <button class="btn btn-outline-secondary btn-sm me-2" onclick="clearLogs()">Hapus Log</button>
                         <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
@@ -258,6 +258,9 @@ if ($is_logged_in) {
                             <div class="d-flex justify-content-between small">
                                 <span>📱 Mobile: <strong><?php echo $logs['devices']['Mobile']; ?></strong></span>
                                 <span>💻 PC: <strong><?php echo ($logs['devices']['Desktop'] + $logs['devices']['Tablet']); ?></strong></span>
+                            </div>
+                            <div class="mt-2 pt-2 border-top text-end">
+                                <a href="admin_logs.php" class="text-decoration-none small fw-bold">Lihat Detail Log →</a>
                             </div>
                         </div>
                     </div>
