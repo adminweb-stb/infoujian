@@ -7,6 +7,14 @@ require_once 'db.php';
 
 // Disable error reporting for silent background operation
 error_reporting(0);
+
+// SECURITY: Cloaking - Hide from direct browser access (GET)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(404);
+    include '404.html';
+    exit;
+}
+
 header('Content-Type: application/json');
 
 // Session to cache Geo-IP and avoid over-calling external API

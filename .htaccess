@@ -14,12 +14,10 @@
     Header unset X-Powered-By
 </IfModule>
 
-# --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS ---
-# Block database credentials and config files
-<FilesMatch "^(db\.php|config\.json|migrate_.*\.php)$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
+# --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS (CLOAKING MODE) ---
+# Force 404 status for internal system files
+RewriteEngine On
+RewriteRule ^(db\.php|config\.json|sync_data\.php|migrate_.*\.php)$ /ujian/404.html [R=404,L]
 
 # Block critical extensions project-wide
 <FilesMatch "\.(log|sql|env|bak|old|lama|csv)$">
