@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -75,7 +79,7 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 25px -10px rgba(79, 70, 229, 0.6);
         }
-        
+
         footer {
             text-align: center;
             color: #64748b;
@@ -86,24 +90,43 @@
         }
 
         @media (prefers-color-scheme: dark) {
-            body { background-color: #0f172a; color: #cbd5e1; }
-            h1 { color: #1e293b; text-shadow: 4px 4px 0 #334155; }
-            h2 { color: #f8fafc; }
-            p { color: #94a3b8; }
-            footer { border-top-color: #334155; color: #64748b; }
+            body {
+                background-color: #0f172a;
+                color: #cbd5e1;
+            }
+
+            h1 {
+                color: #1e293b;
+                text-shadow: 4px 4px 0 #334155;
+            }
+
+            h2 {
+                color: #f8fafc;
+            }
+
+            p {
+                color: #94a3b8;
+            }
+
+            footer {
+                border-top-color: #334155;
+                color: #64748b;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="error-wrapper">
         <div class="error-container">
             <h1>404</h1>
             <h2>Waduh, Anda Tersesat!</h2>
-            <p>Halaman atau direktori yang Anda cari tidak dapat ditemukan, atau akses ke area ini dibatasi oleh sistem peladen.</p>
-            <a href="/ujian/index.html" class="btn-home">Kembali ke Beranda</a>
+            <p>Halaman atau direktori yang Anda cari tidak dapat ditemukan, atau akses ke area ini dibatasi oleh sistem
+                peladen.</p>
+            <a href="/ujian/" class="btn-home">Kembali ke Beranda</a>
         </div>
     </div>
-    
+
     <footer>
         &copy; <span id="year"></span> Jadwal Ujian Online – PDSI Universitas Satya Terra Bhinneka
     </footer>
@@ -112,4 +135,5 @@
         document.getElementById("year").textContent = new Date().getFullYear();
     </script>
 </body>
+
 </html>

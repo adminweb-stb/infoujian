@@ -3,8 +3,6 @@
  * API LOGGER v2.0 - Advanced Visitor Forensics & Geo-Analytics
  */
 
-require_once 'db.php';
-
 // Disable error reporting for silent background operation
 error_reporting(0);
 
