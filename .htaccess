@@ -15,26 +15,19 @@
 </IfModule>
 
 # --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS ---
-<FilesMatch "\.(csv|log|sql|env|bak|old|lama|php)$">
+# Block database credentials and config files
+<FilesMatch "^(db\.php|config\.json|migrate_.*\.php)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# Exception: Allow Admin scripts in root but block them in subdirectories
-<Directory "c:/laragon/www/ujian/data/">
-    <Files "*">
-        Order Allow,Deny
-        Deny from all
-    </Files>
-    <FilesMatch "\.(json)$">
-        Allow from all
-    </FilesMatch>
-    <Files "template_jadwal.csv">
-        Allow from all
-    </Files>
-</Directory>
+# Block critical extensions project-wide
+<FilesMatch "\.(log|sql|env|bak|old|lama|csv)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
 
-# Exception: Allow admin to download the CSV template
+# Exception: Allow the template
 <Files "template_jadwal.csv">
     Allow from all
 </Files>
