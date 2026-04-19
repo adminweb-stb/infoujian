@@ -1,6 +1,11 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// Restrict CORS to the official domain only
+$allowed_origins = ['https://ujian.satyaterrabhinneka.ac.id', 'http://localhost'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 
 require_once 'db.php';
 

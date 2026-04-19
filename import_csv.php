@@ -60,9 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         fclose($handle);
 
         // --- TRIGGER SYNC ---
-        // Call the sync logic (re-using sync_data.php principle)
-        // We'll just run our sync_data.php via shell or include it
         ob_start();
+        define('INTERNAL_SYNC', true);
         include 'sync_data.php';
         ob_end_clean();
 

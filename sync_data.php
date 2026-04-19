@@ -6,6 +6,15 @@
  * without crashing the database.
  */
 
+// Security: Only allow execution from admin session or internal include
+if (!defined('INTERNAL_SYNC')) {
+    session_start();
+    if (empty($_SESSION['admin_logged_in'])) {
+        http_response_code(403);
+        die(json_encode(['error' => 'Akses ditolak.']));
+    }
+}
+
 header('Content-Type: text/plain');
 require_once 'db.php';
 

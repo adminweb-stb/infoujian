@@ -2,8 +2,16 @@
 session_start();
 
 // --- CONFIGURATION ---
-$admin_pass = 'admin123'; // Change this to your desired password
-$base_path = '/ujian';     // Adjust if your app is in a folder
+// Hash generated with: password_hash('admin123', PASSWORD_BCRYPT)
+// CHANGE THIS: Run password_hash('your_new_password', PASSWORD_BCRYPT) and replace below
+define('ADMIN_PASS_HASH', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+$base_path = '/ujian';
+
+// Brute Force Protection: max 5 attempts
+if (!isset($_SESSION['login_attempts'])) $_SESSION['login_attempts'] = 0;
+if (!isset($_SESSION['lockout_time'])) $_SESSION['lockout_time'] = 0;
+
+$is_locked = ($_SESSION['login_attempts'] >= 5 && (time() - $_SESSION['lockout_time']) < 300);
 
 // Handle Logout
 if (isset($_GET['logout'])) {
@@ -13,11 +21,14 @@ if (isset($_GET['logout'])) {
 }
 
 // Handle Login
-if (isset($_POST['password'])) {
-    if ($_POST['password'] === $admin_pass) {
+if (!$is_locked && isset($_POST['password'])) {
+    if (password_verify($_POST['password'], ADMIN_PASS_HASH)) {
         $_SESSION['admin_logged_in'] = true;
+        $_SESSION['login_attempts'] = 0;
     } else {
-        $error = "Password salah!";
+        $_SESSION['login_attempts']++;
+        $_SESSION['lockout_time'] = time();
+        $error = "Password salah! Sisa percobaan: " . max(0, 5 - $_SESSION['login_attempts']);
     }
 }
 
@@ -70,9 +81,11 @@ if ($is_logged_in) {
                         <p class="text-muted">Masukkan password untuk mengelola jadwal.</p>
                     </div>
                     
-                    <?php if (isset($error)): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
+            <?php if ($is_locked): ?>
+                <div class="alert alert-danger">Terlalu banyak percobaan login. Coba lagi dalam 5 menit.</div>
+            <?php elseif (isset($error)): ?>
+                <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
 
                     <form method="POST">
                         <div class="mb-3">

@@ -1,0 +1,68 @@
+# ============================================================
+# SECURITY & PERFORMANCE - Portal Jadwal Ujian ST Bhinneka
+# ============================================================
+
+# --- 1. SECURITY HEADERS ---
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # Remove server signature
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS ---
+<FilesMatch "\.(json|csv|log|sql|env|bak|old|lama)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Exception: Allow the static JSON data files that power the app (served by JS fetch)
+<Files "semester-2.json">
+    Allow from all
+</Files>
+<Files "semester-4.json">
+    Allow from all
+</Files>
+<Files "semester-6.json">
+    Allow from all
+</Files>
+
+# Block PHP debug tools
+<Files "inspect_db.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# --- 3. GZIP COMPRESSION ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml
+</IfModule>
+
+# --- 4. BROWSER CACHING FOR STATIC ASSETS ---
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # JSON data: 5 minutes (matches JS cache logic)
+    ExpiresByType application/json "access plus 5 minutes"
+    # CSS & JS: 1 week (versioned with ?v= query string)
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    # Images: 1 month
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+</IfModule>
+
+# --- 5. DISABLE DIRECTORY LISTING ---
+Options -Indexes
+
+# --- 6. HIDE .htaccess ITSELF ---
+<Files ".htaccess">
+    Order Allow,Deny
+    Deny from all
+</Files>

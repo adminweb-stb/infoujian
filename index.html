@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Jadwal Ujian Online resmi Universitas Satya Terra Bhinneka. Cek jadwal ujian Semester 2, 4, dan 6 secara real-time.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:title" content="Jadwal Ujian Online | ST Bhinneka">
+    <meta property="og:description" content="Cek jadwal ujian resmi Universitas Satya Terra Bhinneka.">
+    <meta property="og:image" content="images/logo.png">
     <title>Jadwal Ujian | ST Bhinneka</title>
     <link rel="shortcut icon" href="images/logo.png">
     
@@ -147,7 +152,6 @@
 
             // Try Cache First
             if (cached && cacheTime && (now - cacheTime < CACHE_TIME)) {
-                console.log('Using cached data for semester', semester);
                 currentData = JSON.parse(cached);
                 renderTable(currentData);
                 refreshStatus.innerText = `Update terakhir: ${new Date(parseInt(cacheTime)).toLocaleTimeString()}`;
