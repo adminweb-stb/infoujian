@@ -157,9 +157,9 @@ if ($is_logged_in) {
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
             
-            <?php if (!$is_logged_in): ?>
+        <?php if (!$is_logged_in): ?>
+            <div class="col-md-6 col-lg-5">
                 <!-- LOGIN FORM -->
                 <div class="glass-card p-5 mt-5">
                     <div class="text-center mb-4">
@@ -182,8 +182,10 @@ if ($is_logged_in) {
                         <button type="submit" class="btn btn-primary w-100 fw-bold">Login</button>
                     </form>
                 </div>
+            </div>
 
-            <?php else: ?>
+        <?php else: ?>
+            <div class="col-md-11 col-lg-10">
                 <!-- DASHBOARD -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold">Dashboard Admin</h2>
