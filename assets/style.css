@@ -350,4 +350,29 @@ h1 {
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     z-index: 100;
+/* --- Hard Switch: Truly Distinct Desktop vs Mobile Layouts --- */
+@media (min-width: 769px) {
+    .table-container { 
+        display: block !important; 
+    }
+    #mobileCardList { 
+        display: none !important; 
+    }
+}
+
+@media (max-width: 768px) {
+    .table-container { 
+        display: none !important; 
+    }
+    #mobileCardList { 
+        display: block !important; 
+    }
+    
+    /* Mobile-specific adjustments for cards */
+    .container { 
+        padding: 1rem 0.5rem; 
+    }
+    header h1 { 
+        font-size: 1.5rem; 
+    }
 }

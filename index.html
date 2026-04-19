@@ -215,6 +215,10 @@
             noData.style.display = 'none';
             tableWrapper.style.display = 'block';
 
+            // Explicitly clear both views before rendering the active one
+            desktopBody.innerHTML = '';
+            mobileCardList.innerHTML = '';
+
             if (window.innerWidth > 768) {
                 renderDesktopView(filtered, currentTime);
             } else {
@@ -322,9 +326,6 @@
             };
 
             const examDate = parseDate(dateStr);
-            const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const [d, m, y] = dateStr.split('/').map(Number);
-            const examDate = new Date(y, m - 1, d);
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
             if (examDate > today) {
