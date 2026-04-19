@@ -331,11 +331,10 @@
                             </div>
                             <span class="status-badge ${badgeClass}" style="font-size:9px; padding: 0.1rem 0.4rem;">${status}</span>
                         </div>
-                        <span class="kelas-badge">${item["kelas"] || '-'}</span>
                         <div class="card-title">${item["matkul"] || '-'}</div>
                         <div class="card-grid">
                             <div class="grid-item">
-                                <i class="bi bi-door-open"></i> ${item["kelas"] || '-'}
+                                <i class="bi bi-door-open"></i> <span class="kelas-badge" style="border:none; padding:0; background:none; font-size:12px">${item["kelas"] || '-'}</span>
                             </div>
                             <div class="grid-item">
                                 <i class="bi bi-person-badge"></i> ${item["dosen"] || '-'}
