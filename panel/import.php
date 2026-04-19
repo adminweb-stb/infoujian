@@ -5,10 +5,10 @@ if (!isset($_SESSION['admin_logged_in'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
-    require_once 'db.php';
+    require_once '../core/db.php';
     
     // --- MASTER CONFIGURATION ---
-    $config_path = __DIR__ . '/data/config.json';
+    $config_path = __DIR__ . '/../data/config.json';
     if (file_exists($config_path)) {
         $config = json_decode(file_get_contents($config_path), true);
     } else {
@@ -72,16 +72,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         // --- TRIGGER SYNC ---
         ob_start();
         define('INTERNAL_SYNC', true);
-        include 'sync_data.php';
+        include 'sync.php';
         ob_end_clean();
 
         $_SESSION['success'] = "Berhasil mengimpor $count data ke Semester $semester. Otomatis sinkronisasi JSON selesai.";
-        header("Location: admin.php");
+        header("Location: dashboard");
     } else {
         $_SESSION['error'] = "Gagal membaca file CSV.";
-        header("Location: admin.php");
+        header("Location: dashboard");
     }
 } else {
-    header("Location: admin.php");
+    header("Location: dashboard");
 }
 ?>

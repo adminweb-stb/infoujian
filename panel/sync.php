@@ -9,15 +9,15 @@
 // Security: Only allow execution from internal include (admin operations) or CLI
 if (!defined('INTERNAL_SYNC')) {
     http_response_code(404);
-    include '404.html';
+    include '../404.html';
     exit;
 }
 
 header('Content-Type: text/plain');
-require_once 'db.php';
+require_once '../core/db.php';
 
 // --- MASTER CONFIGURATION ---
-$config_path = __DIR__ . '/data/config.json';
+$config_path = __DIR__ . '/../data/config.json';
 if (file_exists($config_path)) {
     $config = json_decode(file_get_contents($config_path), true);
 } else {
@@ -59,7 +59,9 @@ foreach ($table_map as $semester => $table_name) {
         }
 
         $json_file = $output_dir . "{$active_exam}_semester-$semester.json";
-        if (file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT))) {
+        // Final Path Fix: Point to root's data folder from /panel/
+        $json_file_abs = __DIR__ . "/../data/{$active_exam}_semester-$semester.json";
+        if (file_put_contents($json_file_abs, json_encode($data, JSON_PRETTY_PRINT))) {
             echo "Success! Saved to data/{$active_exam}_semester-$semester.json (" . count($data) . " rows)\n";
         } else {
             echo "Error writing file.\n";

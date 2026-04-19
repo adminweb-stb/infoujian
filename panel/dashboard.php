@@ -34,7 +34,7 @@ if (!$is_locked && isset($_POST['password'])) {
 $is_logged_in = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
 // --- MASTER CONFIGURATION ---
-$config_path = __DIR__ . '/data/config.json';
+$config_path = __DIR__ . '/../data/config.json';
 if (file_exists($config_path)) {
     $config = json_decode(file_get_contents($config_path), true);
 } else {
@@ -96,8 +96,8 @@ if ($is_logged_in && isset($_GET['api'])) {
             
             // Trigger Sync
             define('INTERNAL_SYNC', true);
-            $semester = $sem; // Variable expected by sync_data logic
-            ob_start(); include 'sync_data.php'; ob_end_clean();
+            $semester = $sem; // Variable expected by sync logic
+            ob_start(); include 'sync.php'; ob_end_clean();
             
             echo json_encode(['status' => 'success', 'msg' => 'Data berhasil diupdate']);
             exit;
@@ -170,6 +170,21 @@ if ($is_logged_in) {
         }
     }
 }
+require_once '../core/db.php';
+
+// --- MASTER CONFIGURATION ---
+$config_path = __DIR__ . '/../data/config.json';
+if (file_exists($config_path)) {
+    $config = json_decode(file_get_contents($config_path), true);
+} else {
+    $config = ['active_exam' => 'uts', 'active_period' => 'ganjil'];
+}
+$active_exam = $config['active_exam'] ?? 'uts';
+$active_period = $config['active_period'] ?? 'ganjil';
+$active_exam_label = $config['active_exam_label'] ?? 'Ujian Tengah Semester (UTS)';
+
+// --- THEME SYNC ---
+$theme = $_COOKIE['theme'] ?? 'light';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -177,7 +192,7 @@ if ($is_logged_in) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Jadwal Ujian</title>
-    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -199,7 +214,7 @@ if ($is_logged_in) {
                 <!-- LOGIN FORM -->
                 <div class="glass-card p-5 mt-5">
                     <div class="text-center mb-4">
-                        <img src="images/logo.png" alt="logo" width="80" class="mb-3">
+                        <img src="../assets/images/logo.png" alt="logo" width="80" class="mb-3">
                         <h2 class="fw-bold">Admin Dashboard</h2>
                         <p class="text-muted">Masukkan password untuk mengelola jadwal.</p>
                     </div>
@@ -267,10 +282,35 @@ if ($is_logged_in) {
                                 <span>💻 PC: <strong><?php echo ($logs['devices']['Desktop'] + $logs['devices']['Tablet']); ?></strong></span>
                             </div>
                             <div class="mt-2 pt-2 border-top text-end">
-                                <a href="admin_logs.php" class="text-decoration-none small fw-bold">Lihat Detail Log →</a>
+                                <a href="logs" class="text-decoration-none small fw-bold">Lihat Detail Log →</a>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- CSV IMPORT SECTION -->
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">📤 Impor Jadwal Baru (CSV)</h5>
+                    <form action="import" method="POST" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold">Pilih Semester</label>
+                                <select name="semester" class="form-select" required>
+                                    <?php foreach(range(1, 8) as $s) echo "<option value='$s'>Semester $s</option>"; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold">File CSV</label>
+                                <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">Impor</button>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            Format CSV harus mengikuti: <em>HARI, TANGGAL, SESI, MATAKULIAH, JAM, KELAS, DOSEN, LINK_SERVER</em> | <a href="../data/template_jadwal.csv" download>Unduh Template CSV</a>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- MASTER CONFIG SETTINGS -->
@@ -457,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalText = btn.innerHTML;
                 btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
                 
-                const res = await fetch('admin.php?api=update', { method: 'POST', body: formData });
+                const res = await fetch('dashboard?api=update', { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data.status === 'success') {
@@ -486,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const formData = new FormData(e.target);
             try {
-                const res = await fetch('admin.php?api=save_config', { method: 'POST', body: formData });
+                const res = await fetch('dashboard?api=save_config', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') {
                     alert('Pengaturan Global sukses disimpan!');
@@ -503,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function clearLogs() {
     if (!confirm('Apakah Anda yakin ingin menghapus semua data log kunjungan? Tindakan ini tidak dapat dibatalkan.')) return;
     try {
-        const res = await fetch('admin.php?api=clear_logs', { method: 'POST' });
+        const res = await fetch('dashboard?api=clear_logs', { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
             alert(data.msg);
@@ -526,7 +566,7 @@ async function loadDataToTable(sem) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Memuat data dari database...</td></tr>';
     
     try {
-        const res = await fetch(`admin.php?api=get&sem=${sem}`);
+        const res = await fetch(`dashboard?api=get&sem=${sem}`);
         const result = await res.json();
         
         if (result.status === 'success') {
@@ -606,7 +646,7 @@ async function deleteJadwal() {
     fd.append('sem', sem);
     
     try {
-        const res = await fetch('admin.php?api=delete', { method: 'POST', body: fd });
+        const res = await fetch('dashboard?api=delete', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.status === 'success') {
             editFormModal.hide(); // Event listener will trigger liveEditorModal.show()

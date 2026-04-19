@@ -1,70 +1,73 @@
 # ============================================================
-# SECURITY & PERFORMANCE - Portal Jadwal Ujian ST Bhinneka
+# SECURITY & PROFESSIONAL ARCHITECTURE - Jadwal Ujian Online
 # ============================================================
 
-# --- 1. SECURITY HEADERS ---
-<IfModule mod_headers.c>
-    Header always set X-Frame-Options "DENY"
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    # Remove server signature
-    Header unset Server
-    Header unset X-Powered-By
-</IfModule>
-
-# --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS (CLOAKING MODE) ---
-# Force 404 status for internal system files
+Options -Indexes
 RewriteEngine On
-RewriteRule ^(db\.php|config\.json|sync_data\.php|migrate_.*\.php)$ /ujian/404.html [R=404,L]
+RewriteBase /ujian/
 
-# Block critical extensions project-wide
+# --- 1. CLEAN SEO URLS ---
+
+# Map root to index.html (already default, but good to be explicit)
+DirectoryIndex index.html
+
+# Remove .php extension from /panel/ folder
+# Example: /panel/dashboard -> /panel/dashboard.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^panel/([^/]+)$ panel/$1.php [L]
+
+# Custom Mapping for specific endpoints
+RewriteRule ^panel/logger$ panel/logger.php [L]
+RewriteRule ^panel/dashboard$ panel/dashboard.php [L]
+RewriteRule ^panel/logs$ panel/logs.php [L]
+RewriteRule ^panel/import$ panel/import.php [L]
+RewriteRule ^panel/sync$ panel/sync.php [L]
+
+# --- 2. SECURITY & CLOAKING ---
+
+# Block direct access to the CORE folder (jantung sistem)
+RewriteRule ^core/ - [R=404,L]
+
+# Allow public access to the data folder for students (JSON files and config)
+# But block directory listing (already handled by Options -Indexes)
+
+# Force 404 status for direct DB access or internal sync scripts
+RewriteRule ^(core/db\.php|panel/sync\.php|panel/import\.php)$ /ujian/404.html [R=404,L]
+
+# Block sensitive extensions
 <FilesMatch "\.(log|sql|env|bak|old|lama|csv)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# Exception: Allow the template
+# Exception: Allow the CSV template
 <Files "template_jadwal.csv">
     Allow from all
 </Files>
 
-# --- 3. GZIP COMPRESSION ---
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css
-    AddOutputFilterByType DEFLATE application/javascript application/json
-    AddOutputFilterByType DEFLATE image/svg+xml application/xml
+# --- 3. SECURITY HEADERS ---
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# --- 4. BROWSER CACHING FOR STATIC ASSETS ---
+# --- 4. GZIP COMPRESSION ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript
+</IfModule>
+
+# --- 5. BROWSER CACHING ---
 <IfModule mod_expires.c>
     ExpiresActive On
-    # JSON data: 5 minutes (matches JS cache logic)
     ExpiresByType application/json "access plus 5 minutes"
-    # CSS & JS: 1 week (versioned with ?v= query string)
     ExpiresByType text/css "access plus 1 week"
     ExpiresByType application/javascript "access plus 1 week"
-    # Images: 1 month
     ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/x-icon "access plus 1 month"
 </IfModule>
 
-# --- 5. DISABLE DIRECTORY LISTING ---
-Options -Indexes
-
-# --- 6. HIDE .htaccess ITSELF ---
-<Files ".htaccess">
-    Order Allow,Deny
-    Deny from all
-</Files>
-
-# --- 7. CUSTOM ERROR HANDLING (403/404) ---
-# Direct gracefully to custom 404 page for missing files or directory listing attempts
+# --- 6. CUSTOM ERROR HANDLING (403/404) ---
 ErrorDocument 403 /ujian/404.html
 ErrorDocument 404 /ujian/404.html
-
-# Force 404 for direct directory access to /data/ for extra privacy
-RewriteEngine On
-RewriteRule ^data/?$ /ujian/404.html [R=404,L]
