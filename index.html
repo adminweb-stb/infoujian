@@ -185,10 +185,21 @@
 
         const renderTable = (data) => {
             const now = new Date();
-            const currentTime = now.getHours() + (now.getMinutes() / 60);
-            const hariIni = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][now.getDay()].toLowerCase();
+            const hours = now.getHours();
+            const currentTime = hours + (now.getMinutes() / 60);
+            
+            // --- Logic 6 AM Reset ---
+            // If before 6 AM, we are still showing "Yesterday's" final state
+            let displayDate = new Date(now);
+            if (hours < 6) {
+                displayDate.setDate(now.getDate() - 1);
+            }
+            
+            const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const displayDayName = dayNames[displayDate.getDay()].toLowerCase();
+            const displayDateStr = `${String(displayDate.getDate()).padStart(2, '0')}/${String(displayDate.getMonth() + 1).padStart(2, '0')}/${displayDate.getFullYear()}`;
 
-            // Filter data
+            // 1. Initial Filtering (Search or Date)
             let filtered = data;
             const term = searchInput.value.toLowerCase();
             
@@ -200,8 +211,10 @@
                 );
             } else if (!isEvaluationMode) {
                 filtered = data.filter(item => {
-                    let h = (item["hari"] || "").split(',')[0].trim().toLowerCase();
-                    return h === hariIni || h === "hari ini";
+                    // Match by full date string or relative day name
+                    const itemHari = (item["hari"] || "").split(',')[0].trim().toLowerCase();
+                    const itemTanggal = item["tanggal"] || "";
+                    return itemTanggal === displayDateStr || itemHari === displayDayName || itemHari === "hari ini";
                 });
             }
 
@@ -213,10 +226,29 @@
                 return;
             }
 
+            // 2. Progressive Focus Filter (Hide finished sessions except the last one)
+            let focusData = filtered.map((item, idx) => {
+                const statusObj = getStatus(item["tanggal"], item["jam"], currentTime);
+                return { ...item, ...statusObj, originalIndex: idx };
+            });
+
+            if (!isEvaluationMode && !term) {
+                const totalItems = focusData.length;
+                focusData = focusData.filter((item, idx) => {
+                    // Always show Live and Upcoming
+                    if (item.status === "Berlangsung" || item.status === "Mendatang") return true;
+                    
+                    // Show Selesai ONLY if it's the LAST session of the day
+                    const isLastSesi = idx === totalItems - 1;
+                    if (item.status === "Selesai" && isLastSesi) return true;
+                    
+                    return false;
+                });
+            }
+
+            // 3. Render
             noData.style.display = 'none';
             tableWrapper.style.display = 'block';
-
-            // Explicitly clear both views before rendering the active one
             desktopBody.innerHTML = '';
             mobileCardList.innerHTML = '';
 
@@ -224,11 +256,11 @@
             if (window.innerWidth > 768) {
                 desktopContainer.style.setProperty('display', 'block', 'important');
                 mobileCardList.style.setProperty('display', 'none', 'important');
-                renderDesktopView(filtered, currentTime);
+                renderDesktopView(focusData, currentTime);
             } else {
                 desktopContainer.style.setProperty('display', 'none', 'important');
                 mobileCardList.style.setProperty('display', 'block', 'important');
-                renderMobileView(filtered, currentTime);
+                renderMobileView(focusData, currentTime);
             }
         };
 
