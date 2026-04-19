@@ -196,8 +196,9 @@ footer {
 
 :root {
     --fz-body: 14px;
-    --fz-title: 15px;
+    --fz-title: 16px;
     --fz-small: 12px;
+    --fz-micro: 11px;
     
     /* Semantic Colors */
     --clr-active: #10b981;  /* Emerald */
@@ -217,10 +218,12 @@ footer {
 }
 
 #desktopTable th {
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     font-size: var(--fz-small);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
     border-bottom: 2px solid var(--border);
     text-align: left;
 }

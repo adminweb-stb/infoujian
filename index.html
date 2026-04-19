@@ -283,15 +283,15 @@
                     ${dateHeader}
                     <tr class="table-row-premium ${clrClass}">
                         <td>
-                            <div style="font-weight:700; color:var(--primary); display:flex; align-items:center; gap:0.5rem">
+                            <div style="font-weight:700; color:var(--primary); display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.3rem;">
                                 ${item["jam"] || '-'}
-                                <span class="sesi-label" style="font-size:10px">Sesi ${item["sesi"] || index + 1}</span>
+                                <span class="sesi-label" style="font-size:var(--fz-micro)">Sesi ${item["sesi"] || index + 1}</span>
                             </div>
-                            <span class="status-badge ${badgeClass}" style="font-size:9px; padding: 0.15rem 0.5rem;">${status}</span>
+                            <span class="status-badge ${badgeClass}" style="font-size:var(--fz-micro); padding: 0.2rem 0.6rem;">${status}</span>
                         </td>
                         <td>${item["kelas"] || '-'}</td>
-                        <td style="font-weight:700; color:var(--text-main)">${item["matkul"] || '-'}</td>
-                        <td style="font-size:13px; color:var(--text-muted)">${item["dosen"] || '-'}</td>
+                        <td style="font-weight:700; color:var(--text-main); font-size: var(--fz-title)">${item["matkul"] || '-'}</td>
+                        <td style="color:var(--text-muted)">${item["dosen"] || '-'}</td>
                         <td>
                             <a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
                                ${isBerlangsung ? 'target="_blank"' : ''}
