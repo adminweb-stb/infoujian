@@ -2,9 +2,8 @@
 session_start();
 
 // --- CONFIGURATION ---
-// Hash generated with: password_hash('admin123', PASSWORD_BCRYPT)
-// CHANGE THIS: Run password_hash('your_new_password', PASSWORD_BCRYPT) and replace below
-define('ADMIN_PASS_HASH', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+// Hash generated with: password_hash('YthLq7FLuVk3f7U8', PASSWORD_BCRYPT)
+define('ADMIN_PASS_HASH', '$2y$10$0qNPDgWeiNDiS/QRk//0auFMUQha/K3YTw/oIJIPOGxbPQnpkyMIO');
 $base_path = '/ujian';
 
 // Brute Force Protection: max 5 attempts
