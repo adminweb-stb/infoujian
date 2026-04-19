@@ -16,14 +16,20 @@
             background-color: #f8fafc;
             color: #334155;
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .error-wrapper {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             text-align: center;
+            padding: 2rem;
         }
 
         .error-container {
-            padding: 3rem;
             max-width: 500px;
         }
 
@@ -69,21 +75,41 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 25px -10px rgba(79, 70, 229, 0.6);
         }
+        
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            padding: 2rem 1rem;
+            letter-spacing: 0.3px;
+        }
 
         @media (prefers-color-scheme: dark) {
             body { background-color: #0f172a; color: #cbd5e1; }
             h1 { color: #1e293b; text-shadow: 4px 4px 0 #334155; }
             h2 { color: #f8fafc; }
             p { color: #94a3b8; }
+            footer { border-top-color: #334155; color: #64748b; }
         }
     </style>
 </head>
 <body>
-    <div class="error-container">
-        <h1>404</h1>
-        <h2>Waduh, Anda Tersesat!</h2>
-        <p>Halaman atau direktori yang Anda cari tidak dapat ditemukan, atau akses ke area ini dibatasi oleh sistem peladen.</p>
-        <a href="/ujian/" class="btn-home">Kembali ke Beranda</a>
+    <div class="error-wrapper">
+        <div class="error-container">
+            <h1>404</h1>
+            <h2>Waduh, Anda Tersesat!</h2>
+            <p>Halaman atau direktori yang Anda cari tidak dapat ditemukan, atau akses ke area ini dibatasi oleh sistem peladen.</p>
+            <a href="/ujian/" class="btn-home">Kembali ke Beranda</a>
+        </div>
     </div>
+    
+    <footer>
+        &copy; <span id="year"></span> Sistem Ujian Online CBT – PDSI Universitas Satya Terra Bhinneka
+    </footer>
+
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
