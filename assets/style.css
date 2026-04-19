@@ -224,14 +224,35 @@ footer {
 
 :root {
     --fz-body: 14px;
-    --fz-title: 16px;
-    --fz-small: 12px;
     --fz-micro: 11px;
+    
+    /* Default Branding */
+    --semester-accent: #4f46e5;
+    --semester-glow: rgba(79, 70, 229, 0.4);
     
     /* Semantic Colors */
     --clr-active: #10b981;  /* Emerald */
     --clr-upcoming: #4f46e5; /* Indigo */
     --clr-ended: #64748b;    /* Slate */
+}
+
+/* --- Dynamic Semester Branding Themes --- */
+[data-semester-theme="2"] {
+    --semester-accent: #10b981;
+    --semester-glow: rgba(16, 185, 129, 0.4);
+    --primary: #10b981;
+}
+
+[data-semester-theme="4"] {
+    --semester-accent: #f59e0b;
+    --semester-glow: rgba(245, 158, 11, 0.4);
+    --primary: #f59e0b;
+}
+
+[data-semester-theme="6"] {
+    --semester-accent: #6366f1;
+    --semester-glow: rgba(99, 102, 241, 0.4);
+    --primary: #6366f1;
 }
 
 /* --- Desktop: Compact Professional Table --- */
@@ -252,8 +273,9 @@ footer {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid var(--border);
+    border-bottom: 2px solid var(--semester-accent);
     text-align: left;
+    transition: border-color 0.3s ease;
 }
 
 .table-row-premium {
@@ -270,13 +292,14 @@ footer {
 }
 
 .table-row-premium td:first-child { 
-    border-left: 4px solid var(--clr-upcoming); 
+    border-left: 4px solid var(--semester-accent); 
     border-radius: 0.75rem 0 0 0.75rem; 
+    transition: border-color 0.3s ease;
 }
 
-/* Status variants for Desktop Strip */
-.table-row-premium.row-active td:first-child { border-left-color: var(--clr-active); }
-.table-row-premium.row-ended td:first-child { border-left-color: var(--clr-ended); opacity: 0.6; }
+/* Strip color follows Semester Theme for Unity */
+.table-row-premium.row-active td:first-child { border-left-color: var(--semester-accent); }
+.table-row-premium.row-ended td:first-child { border-left-color: var(--semester-accent); opacity: 0.6; }
 
 .table-row-premium td:last-child { 
     border-right: 1px solid var(--glass-border); 
@@ -291,7 +314,7 @@ footer {
 .exam-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--clr-upcoming); /* Standard Strip */
+    border-left: 4px solid var(--semester-accent); /* Branded Strip */
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1.25rem;
@@ -300,11 +323,12 @@ footer {
     gap: 0.85rem;
     box-shadow: 0 10px 15px -10px rgba(0,0,0,0.1);
     position: relative;
+    transition: border-color 0.3s ease;
 }
 
-/* Card Status Variants */
-.card-active { border-left-color: var(--clr-active); }
-.card-ended { border-left-color: var(--clr-ended); opacity: 0.7; }
+/* Card Status Variants (Strip stays Branded) */
+.card-active {  }
+.card-ended { opacity: 0.7; }
 
 .card-title {
     font-size: var(--fz-title);
@@ -323,10 +347,11 @@ footer {
 .time-header {
     font-size: 13px;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--semester-accent);
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: color 0.3s ease;
 }
 
 .sesi-label {

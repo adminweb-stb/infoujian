@@ -138,6 +138,7 @@
 
         // Fetch Data with Caching
         const loadData = async (semester) => {
+            document.documentElement.setAttribute('data-semester-theme', semester);
             currentSemester = semester;
             const cacheKey = `data_sem_${semester}`;
             const cached = localStorage.getItem(cacheKey);
