@@ -145,39 +145,44 @@ h1 {
     color: var(--primary);
 }
 
-/* --- Typography & Global Normalization --- */
-:root {
-    --fz-body: 14px;
-    --fz-title: 16px;
-    --fz-small: 12px;
+/* --- Senior UI/UX Refinement & Global Reset --- */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
-/* --- Desktop: Professional Table (Compact & Luxurious) --- */
+:root {
+    --fz-body: 14px;
+    --fz-title: 15px;
+    --fz-small: 12px;
+    
+    /* Semantic Colors */
+    --clr-active: #10b981;  /* Emerald */
+    --clr-upcoming: #4f46e5; /* Indigo */
+    --clr-ended: #64748b;    /* Slate */
+}
+
+/* --- Desktop: Compact Professional Table --- */
 .table-container {
     padding: 1rem;
-    overflow: visible;
 }
 
 #desktopTable {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 0.5rem;
+    border-spacing: 0 0.6rem;
 }
 
 #desktopTable th {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     font-size: var(--fz-small);
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 600;
     color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
     text-align: left;
 }
 
 .table-row-premium {
     background: var(--card-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 0.75rem;
     transition: all 0.2s ease;
 }
 
@@ -189,176 +194,160 @@ h1 {
     border-bottom: 1px solid var(--glass-border);
 }
 
-.table-row-premium td:first-child { border-left: 1px solid var(--glass-border); border-radius: 0.75rem 0 0 0.75rem; }
-.table-row-premium td:last-child { border-right: 1px solid var(--glass-border); border-radius: 0 0.75rem 0.75rem 0; }
-
-.table-row-premium:hover {
-    background: rgba(79, 70, 229, 0.05);
-    transform: translateY(-1px);
+.table-row-premium td:first-child { 
+    border-left: 4px solid var(--clr-upcoming); 
+    border-radius: 0.75rem 0 0 0.75rem; 
 }
 
-/* --- Mobile: Native-Style Compact Cards --- */
+/* Status variants for Desktop Strip */
+.table-row-premium.row-active td:first-child { border-left-color: var(--clr-active); }
+.table-row-premium.row-ended td:first-child { border-left-color: var(--clr-ended); opacity: 0.6; }
+
+.table-row-premium td:last-child { 
+    border-right: 1px solid var(--glass-border); 
+    border-radius: 0 0.75rem 0.75rem 0; 
+}
+
+/* --- Mobile: Senior Card System --- */
 #mobileCardList {
-    padding: 0.5rem;
+    padding: 1rem 0.75rem;
 }
 
 .exam-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 1rem;
+    border-left: 4px solid var(--clr-upcoming); /* Standard Strip */
+    border-radius: 12px;
     padding: 1.25rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.85rem;
+    box-shadow: 0 10px 15px -10px rgba(0,0,0,0.1);
     position: relative;
-    box-shadow: var(--shadow);
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.card-sesi-badge {
-    background: var(--primary);
-    color: white;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    font-weight: 800;
-    font-size: 0.85rem;
-}
+/* Card Status Variants */
+.card-active { border-left-color: var(--clr-active); }
+.card-ended { border-left-color: var(--clr-ended); opacity: 0.7; }
 
 .card-title {
     font-size: var(--fz-title);
     font-weight: 700;
     color: var(--text-main);
-    line-height: 1.3;
-    flex: 1;
-    word-break: break-word; /* Prevent long word overflow */
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.card-meta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.time-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sesi-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
 .card-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px dashed var(--border);
+    gap: 0.75rem;
+    margin-top: 0.25rem;
 }
 
 .grid-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: var(--fz-small);
+    font-size: 12px;
     color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.grid-item i { color: var(--primary); font-size: 0.9rem; }
+.grid-item i { color: var(--clr-upcoming); opacity: 0.7; }
 
-.card-action {
-    margin-top: 0.5rem;
+/* Sentence Case Refresh */
+.btn-premium {
     display: block;
     width: 100%;
-    text-align: center;
     padding: 0.85rem;
-    background: var(--primary);
-    color: white;
-    border-radius: 0.75rem;
+    border-radius: 10px;
+    text-align: center;
     text-decoration: none;
-    font-weight: 700;
-    font-size: var(--fz-body);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
 }
 
-.card-action.btn-disabled {
-    background: var(--text-muted);
-    opacity: 0.5;
+.btn-active {
+    background: var(--clr-active);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-upcoming {
+    background: transparent;
+    border: 1.5px solid var(--clr-upcoming);
+    color: var(--clr-upcoming);
+}
+
+.btn-ended {
+    background: #f1f5f9;
+    color: #94a3b8;
     cursor: not-allowed;
 }
 
-/* --- Shared Components --- */
-.status-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
+[data-theme="dark"] .btn-ended {
+    background: #1e293b;
+    color: #475569;
 }
 
+/* Header & Tab refinement */
 .date-separator {
     text-align: center;
-    padding: 2.5rem 0 1rem 0;
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    padding: 2rem 0 1rem 0;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: capitalize; /* Better than uppercase */
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .date-separator::before, .date-separator::after {
-    content: "";
-    flex: 1;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    content: ""; flex: 1; height: 1px; background: var(--border);
 }
 
-.btn-eval {
-    background: var(--card-bg);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-eval.active {
-    background: var(--primary);
-    color: white;
-}
-
-/* --- Hide/Show Logic --- */
-@media (min-width: 769px) {
-    #mobileCardList { display: none; }
-    #desktopTable { display: table; }
-}
-
-@media (max-width: 768px) {
-    #desktopTable { display: none; }
-    #mobileCardList { display: block; }
-    
-    .container { padding: 1rem 0.5rem; }
-    h1 { font-size: var(--fz-title); }
-}
-
-/* Theme Toggle & Footer (Subtle) */
 #themeToggle {
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 3rem;
-    height: 3rem;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.2rem;
+    height: 3.2rem;
     border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    color: var(--text-main);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
     z-index: 100;
-}
-
-footer {
-    opacity: 0.6;
-    margin-top: 3rem;
-    font-size: var(--fz-small);
 }

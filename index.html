@@ -55,10 +55,9 @@
                 <table id="desktopTable">
                     <thead>
                         <tr>
-                            <th>Sesi</th>
                             <th>Jam & Status</th>
                             <th>Kelas</th>
-                            <th>Mata Kuliah</th>
+                            <th>Mata kuliah</th>
                             <th>Dosen</th>
                             <th style="width: 120px;">Aksi</th>
                         </tr>
@@ -229,27 +228,34 @@
                 const dateRaw = `${item["hari"] || '-'}, ${item["tanggal"] || '-'}`;
                 let dateHeader = "";
                 if (isEvaluationMode && dateRaw !== lastDate) {
-                    dateHeader = `<tr class="date-group-header-row"><td colspan="6"><div class="date-separator">${dateRaw}</div></td></tr>`;
+                    dateHeader = `<tr><td colspan="6"><div class="date-separator">${dateRaw}</div></td></tr>`;
                     lastDate = dateRaw;
                 }
 
-                const { status, badgeClass } = getStatus(item["jam"], currentTime);
+                const { status, badgeClass, clrClass } = getStatus(item["jam"], currentTime);
                 const serverUrl = item["link_server"] || "#";
+                const isBerlangsung = status === 'Berlangsung';
+                const isSelesai = status === 'Selesai';
 
                 return `
                     ${dateHeader}
-                    <tr class="table-row-premium">
-                        <td><div class="card-sesi-badge" style="display:inline-block">${item["sesi"] || index + 1}</div></td>
+                    <tr class="table-row-premium ${clrClass}">
                         <td>
-                            <div style="font-weight:600; font-size:13px">${item["jam"] || '-'}</div>
-                            <span class="status-badge ${badgeClass}">${status}</span>
+                            <div style="font-weight:700; color:var(--primary); display:flex; align-items:center; gap:0.5rem">
+                                ${item["jam"] || '-'}
+                                <span class="sesi-label" style="font-size:10px">Sesi ${item["sesi"] || index + 1}</span>
+                            </div>
+                            <span style="font-size:11px; font-weight:700; color:var(--text-muted)">${status}</span>
                         </td>
                         <td>${item["kelas"] || '-'}</td>
-                        <td style="font-weight:700; color:var(--primary)">${item["matkul"] || '-'}</td>
+                        <td style="font-weight:700; color:var(--text-main)">${item["matkul"] || '-'}</td>
                         <td style="font-size:13px; color:var(--text-muted)">${item["dosen"] || '-'}</td>
                         <td>
-                            <a href="${serverUrl}" target="_blank" class="card-action ${status !== 'Berlangsung' ? 'btn-disabled' : ''}" style="padding:0.5rem; font-size:12px">
-                                ${status === 'Berlangsung' ? 'MASUK UJIAN' : 'TERKUNCI'}
+                            <a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
+                               ${isBerlangsung ? 'target="_blank"' : ''}
+                               class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}" 
+                               style="padding:0.5rem; font-size:12px">
+                                ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : 'Terkunci')}
                             </a>
                         </td>
                     </tr>
@@ -267,30 +273,34 @@
                     lastDate = dateRaw;
                 }
 
-                const { status, badgeClass } = getStatus(item["jam"], currentTime);
+                const { status, badgeClass, clrClass } = getStatus(item["jam"], currentTime);
                 const serverUrl = item["link_server"] || "#";
+                const isBerlangsung = status === 'Berlangsung';
+                const isSelesai = status === 'Selesai';
 
                 return `
                     ${dateHeader}
-                    <div class="exam-card">
-                        <div class="card-header">
-                            <div class="card-sesi-badge">${item["sesi"] || index+1}</div>
-                            <span class="status-badge ${badgeClass}">${status}</span>
+                    <div class="exam-card ${clrClass}">
+                        <div class="card-meta-header">
+                            <div class="time-header">
+                                <i class="bi bi-clock-history"></i> ${item["jam"] || '-'}
+                                <span class="sesi-label">Sesi ${item["sesi"] || index+1}</span>
+                            </div>
+                            <span style="font-size:11px; font-weight:700; color:var(--text-muted)">${status}</span>
                         </div>
                         <div class="card-title">${item["matkul"] || '-'}</div>
                         <div class="card-grid">
                             <div class="grid-item">
-                                <i class="bi bi-clock"></i> ${item["jam"] || '-'}
-                            </div>
-                            <div class="grid-item">
                                 <i class="bi bi-door-open"></i> ${item["kelas"] || '-'}
                             </div>
-                            <div class="grid-item" style="grid-column: span 2">
+                            <div class="grid-item">
                                 <i class="bi bi-person-badge"></i> ${item["dosen"] || '-'}
                             </div>
                         </div>
-                        <a href="${serverUrl}" target="_blank" class="card-action ${status !== 'Berlangsung' ? 'btn-disabled' : ''}">
-                            ${status === 'Berlangsung' ? 'MASUK UJIAN' : 'TERKUNCI'}
+                        <a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
+                           ${isBerlangsung ? 'target="_blank"' : ''}
+                           class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}">
+                           ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : 'Terkunci')}
                         </a>
                     </div>
                 `;
@@ -298,17 +308,22 @@
         };
 
         const getStatus = (jamRaw, currentTime) => {
-            let status = "Upcoming";
+            let status = "Mendatang";
             let badgeClass = "status-upcoming";
+            let clrClass = "";
             if (jamRaw && jamRaw.includes("-")) {
                 const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".")));
                 if (currentTime >= mulai && currentTime <= selesai) {
-                    status = "Berlangsung"; badgeClass = "status-active";
+                    status = "Berlangsung"; 
+                    badgeClass = "status-active";
+                    clrClass = "card-active row-active";
                 } else if (currentTime > selesai) {
-                    status = "Selesai"; badgeClass = "status-ended";
+                    status = "Selesai"; 
+                    badgeClass = "status-ended";
+                    clrClass = "card-ended row-ended";
                 }
             }
-            return { status, badgeClass };
+            return { status, badgeClass, clrClass };
         };
 
         window.addEventListener('resize', () => renderTable(currentData));
