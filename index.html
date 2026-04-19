@@ -50,8 +50,9 @@
         </div>
 
         <div id="tableWrapper" class="glass-card fade-in-up" style="display: none;">
-            <div class="table-responsive">
-                <table>
+            <!-- View 1: Desktop Table (Hidden on Mobile via CSS) -->
+            <div class="table-container">
+                <table id="desktopTable">
                     <thead>
                         <tr>
                             <th>Sesi</th>
@@ -59,14 +60,15 @@
                             <th>Kelas</th>
                             <th>Mata Kuliah</th>
                             <th>Dosen</th>
-                            <th style="min-width: 150px;">Aksi</th>
+                            <th style="width: 120px;">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="ujianBody">
-                        <!-- Content will be injected by JavaScript -->
-                    </tbody>
+                    <tbody id="desktopBody"></tbody>
                 </table>
             </div>
+
+            <!-- View 2: Mobile Card List (Hidden on Desktop via CSS) -->
+            <div id="mobileCardList"></div>
             <div id="noData" style="display: none; padding: 3rem; text-align: center; color: var(--text-muted);">
                 <i class="bi bi-calendar-x" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
                 <p>Tidak ada jadwal ujian untuk kriteria pencarian ini atau hari ini.</p>
@@ -87,7 +89,8 @@
         let currentSemester = 1;
 
         // UI Elements
-        const ujianBody = document.getElementById('ujianBody');
+        const desktopBody = document.getElementById('desktopBody');
+        const mobileCardList = document.getElementById('mobileCardList');
         const tableWrapper = document.getElementById('tableWrapper');
         const noData = document.getElementById('noData');
         const infoBar = document.getElementById('infoHariTanggal');
@@ -187,18 +190,15 @@
 
             // Filter data
             let filtered = data;
-            
-            // 1. Filter by Search input
             const term = searchInput.value.toLowerCase();
+            
             if (term) {
                 filtered = data.filter(i => 
                     (i["matkul"] || "").toLowerCase().includes(term) ||
                     (i["kelas"] || "").toLowerCase().includes(term) ||
                     (i["dosen"] || "").toLowerCase().includes(term)
                 );
-            } 
-            // 2. Filter by Today (Only if NOT in evaluation mode and NO search active)
-            else if (!isEvaluationMode) {
+            } else if (!isEvaluationMode) {
                 filtered = data.filter(item => {
                     let h = (item["hari"] || "").split(',')[0].trim().toLowerCase();
                     return h === hariIni || h === "hari ini";
@@ -208,87 +208,110 @@
             if (filtered.length === 0) {
                 tableWrapper.style.display = 'block';
                 noData.style.display = 'block';
-                ujianBody.innerHTML = '';
+                desktopBody.innerHTML = '';
+                mobileCardList.innerHTML = '';
                 return;
             }
 
             noData.style.display = 'none';
             tableWrapper.style.display = 'block';
-            
+
+            if (window.innerWidth > 768) {
+                renderDesktopView(filtered, currentTime);
+            } else {
+                renderMobileView(filtered, currentTime);
+            }
+        };
+
+        const renderDesktopView = (data, currentTime) => {
             let lastDate = "";
-            ujianBody.innerHTML = filtered.map((item, index) => {
-                const jamRaw = item["jam"] || "";
+            desktopBody.innerHTML = data.map((item, index) => {
                 const dateRaw = `${item["hari"] || '-'}, ${item["tanggal"] || '-'}`;
-                
                 let dateHeader = "";
                 if (isEvaluationMode && dateRaw !== lastDate) {
-                    dateHeader = `
-                        <tr class="date-group-header">
-                            <td colspan="6">
-                                <i class="bi bi-calendar-check"></i> &nbsp; ${dateRaw}
-                            </td>
-                        </tr>
-                    `;
+                    dateHeader = `<tr class="date-group-header-row"><td colspan="6"><div class="date-separator">${dateRaw}</div></td></tr>`;
                     lastDate = dateRaw;
                 }
 
-                let status = "Upcoming";
-                let badgeClass = "status-upcoming";
-                
-                if (jamRaw && jamRaw.includes("-")) {
-                    const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".")));
-                    if (currentTime < mulai) {
-                        status = "Belum Mulai";
-                    } else if (currentTime > selesai) {
-                        status = "Selesai";
-                        badgeClass = "status-ended";
-                    } else {
-                        status = "Berlangsung";
-                        badgeClass = "status-active";
-                    }
-                }
-
+                const { status, badgeClass } = getStatus(item["jam"], currentTime);
                 const serverUrl = item["link_server"] || "#";
 
                 return `
                     ${dateHeader}
-                    <tr class="exam-row ${status === 'Selesai' ? 'row-ended' : ''}">
-                        <td data-label="Sesi">
-                            <div class="sesi-pill">${item["sesi"] || index + 1}</div>
-                        </td>
-                        <td data-label="Jam & Status">
-                            <div class="time-container">
-                                <i class="bi bi-clock"></i> ${jamRaw}
-                            </div>
+                    <tr class="table-row-premium">
+                        <td><div class="card-sesi-badge" style="display:inline-block">${item["sesi"] || index + 1}</div></td>
+                        <td>
+                            <div style="font-weight:600; font-size:13px">${item["jam"] || '-'}</div>
                             <span class="status-badge ${badgeClass}">${status}</span>
                         </td>
-                        <td data-label="Kelas">
-                            <div class="detail-item">
-                                <i class="bi bi-door-open"></i> ${item["kelas"] || '-'}
-                            </div>
-                        </td>
-                        <td data-label="Mata Kuliah">
-                            <div class="premium-matkul">${item["matkul"] || '-'}</div>
-                        </td>
-                        <td data-label="Dosen">
-                            <div class="detail-item">
-                                <i class="bi bi-person-badge"></i> ${item["dosen"] || '-'}
-                            </div>
-                        </td>
-                        <td data-label="Aksi">
-                            ${status === "Berlangsung" ? 
-                                `<a href="${serverUrl}" target="_blank" class="server-link shadow-glow">
-                                    <i class="bi bi-lightning-fill"></i> MASUK UJIAN
-                                 </a>` : 
-                                `<button class="server-link btn-locked" disabled>
-                                    <i class="bi bi-lock-fill"></i> ${status === "Selesai" ? "SELESAI" : "TERKUNCI"}
-                                 </button>`
-                            }
+                        <td>${item["kelas"] || '-'}</td>
+                        <td style="font-weight:700; color:var(--primary)">${item["matkul"] || '-'}</td>
+                        <td style="font-size:13px; color:var(--text-muted)">${item["dosen"] || '-'}</td>
+                        <td>
+                            <a href="${serverUrl}" target="_blank" class="card-action ${status !== 'Berlangsung' ? 'btn-disabled' : ''}" style="padding:0.5rem; font-size:12px">
+                                ${status === 'Berlangsung' ? 'MASUK UJIAN' : 'TERKUNCI'}
+                            </a>
                         </td>
                     </tr>
                 `;
             }).join('');
         };
+
+        const renderMobileView = (data, currentTime) => {
+            let lastDate = "";
+            mobileCardList.innerHTML = data.map((item, index) => {
+                const dateRaw = `${item["hari"] || '-'}, ${item["tanggal"] || '-'}`;
+                let dateHeader = "";
+                if (isEvaluationMode && dateRaw !== lastDate) {
+                    dateHeader = `<div class="date-separator">${dateRaw}</div>`;
+                    lastDate = dateRaw;
+                }
+
+                const { status, badgeClass } = getStatus(item["jam"], currentTime);
+                const serverUrl = item["link_server"] || "#";
+
+                return `
+                    ${dateHeader}
+                    <div class="exam-card">
+                        <div class="card-header">
+                            <div class="card-sesi-badge">${item["sesi"] || index+1}</div>
+                            <span class="status-badge ${badgeClass}">${status}</span>
+                        </div>
+                        <div class="card-title">${item["matkul"] || '-'}</div>
+                        <div class="card-grid">
+                            <div class="grid-item">
+                                <i class="bi bi-clock"></i> ${item["jam"] || '-'}
+                            </div>
+                            <div class="grid-item">
+                                <i class="bi bi-door-open"></i> ${item["kelas"] || '-'}
+                            </div>
+                            <div class="grid-item" style="grid-column: span 2">
+                                <i class="bi bi-person-badge"></i> ${item["dosen"] || '-'}
+                            </div>
+                        </div>
+                        <a href="${serverUrl}" target="_blank" class="card-action ${status !== 'Berlangsung' ? 'btn-disabled' : ''}">
+                            ${status === 'Berlangsung' ? 'MASUK UJIAN' : 'TERKUNCI'}
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        const getStatus = (jamRaw, currentTime) => {
+            let status = "Upcoming";
+            let badgeClass = "status-upcoming";
+            if (jamRaw && jamRaw.includes("-")) {
+                const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".")));
+                if (currentTime >= mulai && currentTime <= selesai) {
+                    status = "Berlangsung"; badgeClass = "status-active";
+                } else if (currentTime > selesai) {
+                    status = "Selesai"; badgeClass = "status-ended";
+                }
+            }
+            return { status, badgeClass };
+        };
+
+        window.addEventListener('resize', () => renderTable(currentData));
 
         // Tab Handling
         document.querySelectorAll('.nav-link').forEach(link => {
