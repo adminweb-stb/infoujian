@@ -217,6 +217,111 @@ footer {
     line-height: 1.6;
 }
 
+/* --- Skeleton Loading --- */
+@keyframes shimmer {
+    0%   { background-position: -800px 0; }
+    100% { background-position: 800px 0; }
+}
+
+.skeleton-wrapper {
+    padding: 1rem;
+}
+
+.skeleton-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.6rem;
+    border-radius: 0.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--semester-accent);
+    opacity: 0.8;
+}
+
+.skeleton-block {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, rgba(255,255,255,0.3) 50%, var(--border) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite linear;
+    flex-shrink: 0;
+}
+
+.skeleton-block.sm  { height: 12px; width: 80px; }
+.skeleton-block.md  { height: 14px; width: 140px; }
+.skeleton-block.lg  { height: 16px; width: 220px; }
+.skeleton-block.btn { height: 32px; width: 90px; border-radius: 8px; margin-left: auto; }
+
+/* Mobile skeleton card */
+.skeleton-card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--semester-accent);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+/* --- CSS-Only Tooltip for Locked Button --- */
+.tooltip-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.tooltip-wrapper::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: #1e293b;
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 50;
+    letter-spacing: 0.3px;
+}
+
+.tooltip-wrapper::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    border: 5px solid transparent;
+    border-top-color: #1e293b;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 50;
+}
+
+.tooltip-wrapper:hover::after,
+.tooltip-wrapper:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+[data-theme="dark"] .tooltip-wrapper::after {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+[data-theme="dark"] .tooltip-wrapper::before {
+    border-top-color: #f8fafc;
+}
+
 /* --- Senior UI/UX Refinement & Global Reset --- */
 *, *::before, *::after {
     box-sizing: border-box;
