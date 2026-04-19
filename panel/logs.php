@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: dashboard");
+    header("Location: ./");
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($res) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Detail | Admin Panel</title>
-    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@ if ($res) {
             
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <a href="dashboard" class="text-decoration-none small fw-bold text-muted mb-2 d-block">← Kembali ke Panel Utama</a>
+                    <a href="./" class="text-decoration-none small fw-bold text-muted mb-2 d-block">← Kembali ke Panel Utama</a>
                     <h2 class="fw-bold m-0">Log Kunjungan Detail</h2>
                     <p class="text-muted small m-0">Menampilkan 200 interaksi terbaru dari mahasiswa.</p>
                 </div>
@@ -123,7 +123,7 @@ if ($res) {
 async function clearLogs() {
     if (!confirm('Apakah Anda yakin ingin menghapus semua data log kunjungan?')) return;
     try {
-        const res = await fetch('dashboard?api=clear_logs', { method: 'POST' });
+        const res = await fetch('./?api=clear_logs', { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
             window.location.reload();

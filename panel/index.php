@@ -15,7 +15,7 @@ $is_locked = ($_SESSION['login_attempts'] >= 5 && (time() - $_SESSION['lockout_t
 // Handle Logout
 if (isset($_GET['logout'])) {
     session_destroy();
-    header("Location: admin.php");
+    header("Location: ./");
     exit();
 }
 
@@ -46,7 +46,7 @@ $sem_array = ($active_period === 'ganjil') ? [1, 3, 5, 7] : [2, 4, 6, 8];
 
 // --- INTERNAL API FOR LIVE EDITOR & SETTINGS ---
 if ($is_logged_in && isset($_GET['api'])) {
-    require_once 'db.php';
+    require_once '../core/db.php';
     header('Content-Type: application/json');
     $api = $_GET['api'];
 
@@ -135,7 +135,7 @@ if ($is_logged_in && isset($_GET['api'])) {
 // If logged in, get statistics
 $stats = [];
 if ($is_logged_in) {
-    require_once 'db.php';
+    require_once '../core/db.php';
     foreach ($sem_array as $sem) {
         $table = "{$active_exam}_semester_$sem";
         $check = $conn->query("SHOW TABLES LIKE '$table'");
@@ -192,7 +192,7 @@ $theme = $_COOKIE['theme'] ?? 'light';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Jadwal Ujian</title>
-    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalText = btn.innerHTML;
                 btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
                 
-                const res = await fetch('dashboard?api=update', { method: 'POST', body: formData });
+                const res = await fetch('./?api=update', { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data.status === 'success') {
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const formData = new FormData(e.target);
             try {
-                const res = await fetch('dashboard?api=save_config', { method: 'POST', body: formData });
+                const res = await fetch('./?api=save_config', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') {
                     alert('Pengaturan Global sukses disimpan!');
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function clearLogs() {
     if (!confirm('Apakah Anda yakin ingin menghapus semua data log kunjungan? Tindakan ini tidak dapat dibatalkan.')) return;
     try {
-        const res = await fetch('dashboard?api=clear_logs', { method: 'POST' });
+        const res = await fetch('./?api=clear_logs', { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
             alert(data.msg);
@@ -566,7 +566,7 @@ async function loadDataToTable(sem) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Memuat data dari database...</td></tr>';
     
     try {
-        const res = await fetch(`dashboard?api=get&sem=${sem}`);
+        const res = await fetch(`./?api=get&sem=${sem}`);
         const result = await res.json();
         
         if (result.status === 'success') {
@@ -646,7 +646,7 @@ async function deleteJadwal() {
     fd.append('sem', sem);
     
     try {
-        const res = await fetch('dashboard?api=delete', { method: 'POST', body: fd });
+        const res = await fetch('./?api=delete', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.status === 'success') {
             editFormModal.hide(); // Event listener will trigger liveEditorModal.show()

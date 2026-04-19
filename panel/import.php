@@ -76,12 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         ob_end_clean();
 
         $_SESSION['success'] = "Berhasil mengimpor $count data ke Semester $semester. Otomatis sinkronisasi JSON selesai.";
-        header("Location: dashboard");
+        header("Location: ./");
     } else {
         $_SESSION['error'] = "Gagal membaca file CSV.";
-        header("Location: dashboard");
+        header("Location: ./");
     }
 } else {
-    header("Location: dashboard");
+    header("Location: ./");
 }
 ?>

@@ -11,15 +11,18 @@ RewriteBase /ujian/
 # Map root to index.html (already default, but good to be explicit)
 DirectoryIndex index.html
 
-# Remove .php extension from /panel/ folder
-# Example: /panel/dashboard -> /panel/dashboard.php
+# Admin Panel: Serve panel/index.php when accessing /panel/
+# This allows http://localhost/ujian/panel/ to work directly.
+RewriteRule ^panel/$ panel/index.php [L]
+
+# Mapping for the new panel structure (no extensions)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^panel/([^/]+)$ panel/$1.php [L]
 
-# Custom Mapping for specific endpoints
+# Specific mappings for consistency (all point to panel/index.php or their respective files)
+RewriteRule ^panel/dashboard$ panel/index.php [L]
 RewriteRule ^panel/logger$ panel/logger.php [L]
-RewriteRule ^panel/dashboard$ panel/dashboard.php [L]
 RewriteRule ^panel/logs$ panel/logs.php [L]
 RewriteRule ^panel/import$ panel/import.php [L]
 RewriteRule ^panel/sync$ panel/sync.php [L]
@@ -28,9 +31,6 @@ RewriteRule ^panel/sync$ panel/sync.php [L]
 
 # Block direct access to the CORE folder (jantung sistem)
 RewriteRule ^core/ - [R=404,L]
-
-# Allow public access to the data folder for students (JSON files and config)
-# But block directory listing (already handled by Options -Indexes)
 
 # Force 404 status for direct DB access or internal sync scripts
 RewriteRule ^(core/db\.php|panel/sync\.php|panel/import\.php)$ /ujian/404.html [R=404,L]
