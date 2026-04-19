@@ -197,7 +197,7 @@
             document.documentElement.setAttribute('data-semester-theme', semester);
             currentSemester = semester;
             showSkeleton();
-            const cacheKey = `data_sem_${semester}`;
+            const cacheKey = `data_${activeExam}_sem_${semester}`;
             const cached = localStorage.getItem(cacheKey);
             const cacheTime = localStorage.getItem(`${cacheKey}_time`);
             const now = Date.now();
