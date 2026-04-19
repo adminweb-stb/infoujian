@@ -53,6 +53,13 @@ if ($is_logged_in && isset($_GET['api'])) {
     try {
         if ($api === 'save_config' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $new_exam = $_POST['active_exam'] ?? 'uts';
+            
+            // SECURITY: Whitelist check for exam prefix to prevent Second Order SQLi
+            if (!preg_match('/^[a-z0-9_]+$/', $new_exam)) {
+                echo json_encode(['status' => 'error', 'msg' => 'Format jenis ujian tidak valid.']);
+                exit;
+            }
+
             $new_label = $_POST['active_exam_label'] ?? 'Ujian Tengah Semester (UTS)';
             $new_period = $_POST['active_period'] ?? 'ganjil';
             file_put_contents($config_path, json_encode([

@@ -15,20 +15,28 @@
 </IfModule>
 
 # --- 2. BLOCK SENSITIVE FILES FROM DIRECT ACCESS ---
-<FilesMatch "\.(csv|log|sql|env|bak|old|lama)$">
+<FilesMatch "\.(csv|log|sql|env|bak|old|lama|php)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
+# Exception: Allow Admin scripts in root but block them in subdirectories
+<Directory "c:/laragon/www/ujian/data/">
+    <Files "*">
+        Order Allow,Deny
+        Deny from all
+    </Files>
+    <FilesMatch "\.(json)$">
+        Allow from all
+    </FilesMatch>
+    <Files "template_jadwal.csv">
+        Allow from all
+    </Files>
+</Directory>
+
 # Exception: Allow admin to download the CSV template
 <Files "template_jadwal.csv">
     Allow from all
-</Files>
-
-# Block PHP debug tools
-<Files "inspect_db.php">
-    Order Allow,Deny
-    Deny from all
 </Files>
 
 # --- 3. GZIP COMPRESSION ---
