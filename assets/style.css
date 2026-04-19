@@ -562,6 +562,54 @@ footer {
 }
 
 /* Header & Tab refinement */
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-brand img {
+    width: 80px;
+    height: auto;
+}
+
+.header-text h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.8rem;
+}
+
+.header-text p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+#themeToggle {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#themeToggle:hover {
+    background: var(--semester-glow);
+    border-color: var(--semester-accent);
+}
+
 .date-separator {
     text-align: center;
     padding: 2rem 0 1rem 0;
@@ -576,23 +624,6 @@ footer {
 
 .date-separator::before, .date-separator::after {
     content: ""; flex: 1; height: 1px; background: var(--border);
-}
-
-#themeToggle {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 3.2rem;
-    height: 3.2rem;
-    border-radius: 50%;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(8px);
-    color: var(--text-main);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    z-index: 100;
 }
 
 /* --- Hard Switch: Truly Distinct Desktop vs Mobile Layouts --- */
@@ -621,10 +652,10 @@ footer {
     }
     .container { padding: 1rem 0.5rem; }
     
-    header { margin-bottom: 1.5rem; }
-    header img { width: 60px !important; margin-bottom: 0.5rem !important; }
-    header h1 { font-size: 1.3rem !important; }
-    header p { display: none; } /* Hide subtitle on mobile for space */
+    .header-main { margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .header-brand img { width: 60px !important; margin-bottom: 0 !important; }
+    .header-text h1 { font-size: 1.3rem !important; }
+    .header-text p { display: none; } /* Hide subtitle on mobile for space */
     
     .nav-tabs { gap: 0.25rem; margin-bottom: 1rem; }
     .nav-link { padding: 0.5rem 0.75rem; font-size: 0.8rem; }

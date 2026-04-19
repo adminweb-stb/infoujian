@@ -24,16 +24,22 @@
 </head>
 <body>
 
-    <button id="themeToggle" title="Toggle Dark Mode">
-        <i class="bi bi-moon-stars"></i>
-    </button>
-
     <div class="container">
         <header>
-            <img src="images/logo.png" alt="Logo ST Bhinneka" style="width: 100px; height: auto; margin-bottom: 1.5rem;">
-            <h1>Jadwal Ujian Online</h1>
-            <p style="color: var(--text-muted); font-size: 1.1rem;">Sistem Informasi Jadwal Ujian Mandiri & Terpusat</p>
+            <div class="header-main">
+                <div class="header-brand">
+                    <img src="images/logo.png" alt="Logo ST Bhinneka">
+                    <div class="header-text">
+                        <h1>Jadwal Ujian Online</h1>
+                        <p>Sistem Informasi Jadwal Ujian Mandiri & Terpusat</p>
+                    </div>
+                </div>
+                <button id="themeToggle" title="Toggle Dark Mode">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+            </div>
         </header>
+
 
         <div id="infoHariTanggal" style="display: none;"></div>
 
@@ -104,11 +110,28 @@
         const evaluationToggle = document.getElementById('evaluationToggle');
         let isEvaluationMode = false;
 
-        // Initialize Theme
-        if (localStorage.getItem('theme') === 'dark') {
+        // Initialize Theme — respects OS preference on first visit
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const useDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+
+        if (useDark) {
             document.body.setAttribute('data-theme', 'dark');
             themeToggle.innerHTML = '<i class="bi bi-sun"></i>';
         }
+
+        // Listen for OS-level theme changes (live switching)
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    document.body.setAttribute('data-theme', 'dark');
+                    themeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+                } else {
+                    document.body.removeAttribute('data-theme');
+                    themeToggle.innerHTML = '<i class="bi bi-moon-stars"></i>';
+                }
+            }
+        });
 
         themeToggle.addEventListener('click', () => {
             if (document.body.getAttribute('data-theme') === 'dark') {
