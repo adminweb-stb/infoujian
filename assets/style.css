@@ -150,10 +150,18 @@ h1 {
 
 .search-icon {
     position: absolute;
-    left: 1rem;
+    left: 1.2rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-muted);
+    color: var(--primary);
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.search-input:focus + .search-icon {
+    transform: translateY(-50%) scale(1.1);
+    color: var(--primary-hover);
 }
 
 /* Info Bar */
