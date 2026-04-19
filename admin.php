@@ -144,6 +144,7 @@ if ($is_logged_in) {
     <title>Admin Portal | Jadwal Ujian</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background: #f4f7f6; color: #333; }
@@ -191,6 +192,20 @@ if ($is_logged_in) {
                     <h2 class="fw-bold">Dashboard Admin</h2>
                     <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
                 </div>
+
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <strong><i class="bi bi-check-circle-fill"></i> Sukses!</strong> <?= htmlspecialchars($_GET['success']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <strong><i class="bi bi-exclamation-triangle-fill"></i> Gagal!</strong> <?= htmlspecialchars($_GET['error']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
                 <!-- MASTER CONFIG SETTINGS -->
                 <div class="glass-card p-4 mb-4 border-primary" style="border-left: 5px solid #4f46e5 !important;">
