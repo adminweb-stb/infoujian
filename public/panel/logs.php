@@ -28,7 +28,19 @@ if ($res) {
 // API Endpoint for Live Update
 if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
     header('Content-Type: application/json');
-    echo json_encode(['status' => 'success', 'data' => $logs]);
+    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+    $limit = 200;
+    
+    $api_logs = [];
+    $stmt = $conn->prepare("SELECT * FROM visitor_logs ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while($row = $res->fetch_assoc()) {
+        $api_logs[] = $row;
+    }
+    
+    echo json_encode(['status' => 'success', 'data' => $api_logs, 'has_more' => count($api_logs) === $limit]);
     exit;
 }
 ?>
@@ -251,6 +263,13 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                 </div>
             </div>
 
+            <!-- Muat Lebih Banyak Button -->
+            <div class="text-center mt-4 mb-5" id="loadMoreContainer">
+                <button class="btn glass-card px-5 py-2 fw-bold text-indigo" id="loadMoreBtn" onclick="loadMoreLogs()">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Muat Lebih Banyak
+                </button>
+            </div>
+
         </div>
     </div>
 </div>
@@ -290,15 +309,56 @@ document.getElementById('autoUpdateToggle').addEventListener('change', function(
     }
 });
 
+let currentOffset = 0;
+const LIMIT = 200;
+
 async function fetchLogs() {
     try {
-        const res = await fetch('./logs?api=get_logs_json');
+        // Only fetch top 200 for live update (refresh current view if at page 0)
+        const res = await fetch(`./logs.php?api=get_logs_json&offset=0`);
         const result = await res.json();
         if (result.status === 'success') {
-            allLogs = result.data;
-            renderLogs(allLogs);
+            // Update allLogs but keep what we've loaded previously if we are scrolled down
+            // For simplicity, live update only refreshes the first page
+            if (currentOffset === 0) {
+                allLogs = result.data;
+                renderLogs(allLogs);
+            }
         }
     } catch (err) {}
+}
+
+async function loadMoreLogs() {
+    const btn = document.getElementById('loadMoreBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memuat...';
+
+    try {
+        currentOffset += LIMIT;
+        const res = await fetch(`./logs.php?api=get_logs_json&offset=${currentOffset}`);
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            if (result.data.length > 0) {
+                allLogs = [...allLogs, ...result.data];
+                renderLogs(allLogs);
+                
+                if (!result.has_more) {
+                    document.getElementById('loadMoreContainer').innerHTML = '<p class="text-muted small">Semua log telah dimuat.</p>';
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } else {
+                document.getElementById('loadMoreContainer').innerHTML = '<p class="text-muted small">Semua log telah dimuat.</p>';
+            }
+        }
+    } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        alert('Gagal memuat data lebih banyak.');
+    }
 }
 
 function renderLogs(data) {

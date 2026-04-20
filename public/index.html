@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     
     <!-- Custom Style -->
-    <link rel="stylesheet" href="assets/css/style.css?v=210421_0358">
+    <link rel="stylesheet" href="assets/css/style.css?v=210421_v2_final">
 </head>
 <body>
 
@@ -614,26 +614,26 @@
 
         initApp();
 
-        // --- Scroll to Top Logic ---
-        const scrollToTopBtn = document.getElementById('scrollToTop');
-        if (scrollToTopBtn) {
+        // --- Scroll to Top Logic (Hard Reset vFinal) ---
+        const vFinalBtn = document.getElementById('vFinalScrollTop');
+        if (vFinalBtn) {
             window.addEventListener('scroll', () => {
                 if (window.pageYOffset > 300) {
-                    scrollToTopBtn.classList.add('visible');
+                    vFinalBtn.classList.add('visible');
                 } else {
-                    scrollToTopBtn.classList.remove('visible');
+                    vFinalBtn.classList.remove('visible');
                 }
             });
 
-            scrollToTopBtn.addEventListener('click', () => {
+            vFinalBtn.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                // Small click feedback logic
-                scrollToTopBtn.style.transform = 'scale(0.8)';
-                setTimeout(() => scrollToTopBtn.style.transform = '', 150);
+                // Feedback animation
+                vFinalBtn.style.transform = 'scale(0.8) translateY(0)';
+                setTimeout(() => vFinalBtn.style.transform = '', 150);
             });
         }
     </script>
-    <button id="scrollToTop" class="scroll-to-top" title="Back to Top">
+    <button id="vFinalScrollTop" class="premium-back-to-top" title="Back to Top">
         <i class="bi bi-arrow-up"></i>
     </button>
 </body>
