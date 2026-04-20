@@ -48,7 +48,7 @@ $sem_array = ($active_period === 'ganjil') ? [1, 3, 5, 7] : [2, 4, 6, 8];
 
 // --- INTERNAL API FOR LIVE EDITOR & SETTINGS ---
 if ($is_logged_in && isset($_GET['api'])) {
-    require_once '../core/db.php';
+    require_once '../../core/db.php';
     header('Content-Type: application/json');
     $api = $_GET['api'];
 
@@ -141,7 +141,7 @@ if ($is_logged_in && isset($_GET['api'])) {
 // If logged in, get statistics
 $stats = [];
 if ($is_logged_in) {
-    require_once '../core/db.php';
+    require_once '../../core/db.php';
     foreach ($sem_array as $sem) {
         $table = "{$active_exam}_semester_$sem";
         $check = $conn->query("SHOW TABLES LIKE '$table'");
@@ -176,7 +176,7 @@ if ($is_logged_in) {
         }
     }
 }
-require_once '../core/db.php';
+require_once '../../core/db.php';
 
 // --- MASTER CONFIGURATION ---
 $config_path = __DIR__ . '/../data/config.json';

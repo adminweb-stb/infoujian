@@ -14,7 +14,7 @@ if (!defined('INTERNAL_SYNC')) {
 }
 
 header('Content-Type: text/plain');
-require_once '../core/db.php';
+require_once '../../core/db.php';
 
 // --- MASTER CONFIGURATION ---
 $config_path = __DIR__ . '/../data/config.json';

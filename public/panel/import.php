@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
-    require_once '../core/db.php';
+    require_once '../../core/db.php';
     
     // --- MASTER CONFIGURATION ---
     $config_path = __DIR__ . '/../data/config.json';

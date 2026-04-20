@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 header('Content-Type: application/json');
 
-require_once '../core/db.php';
+require_once '../../core/db.php';
 
 // Session to cache Geo-IP and avoid over-calling external API
 if (session_status() === PHP_SESSION_NONE) {

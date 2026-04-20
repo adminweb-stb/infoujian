@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-require_once '../core/db.php';
+require_once '../../core/db.php';
 
 // Fetch Logs (Latest 200)
 $logs = [];
