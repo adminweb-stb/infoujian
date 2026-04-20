@@ -1,5 +1,3 @@
-db.php
-config/db.php
 error_log
 # Backup and temporary files
 *.php_lama
@@ -9,3 +7,8 @@ index.html_pakaidb
 index copy.html_
 index-1.html_
 index_lama.html_
+
+# Data Operasional (Dynamic Data)
+# Jangan sync data ini agar jadwal asli di VPS tidak tertimpa dummy lokal
+public/data/*.json
+

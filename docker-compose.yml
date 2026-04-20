@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # PHP-FPM Service (Custom build with mysqli)
+  ujian_php:
+    build: .
+    container_name: ujian_php
+    restart: always
+    volumes:
+      - .:/var/www/html
+    environment:
+      # Database connection environment variables
+      - DB_HOST=global_mariadb
+      - DB_USER=root
+      - DB_PASS=Pd51@2025
+      - DB_NAME=ujian_db
+    networks:
+      - cbt_network
+
+  # Nginx Service
+  ujian_nginx:
+    image: nginx:alpine
+    container_name: ujian_nginx
+    restart: always
+    ports:
+      - "8080:80" # Standard HTTP port (change to 80 if this is your primary server)
+    volumes:
+      - .:/var/www/html
+      - ./nginx/ujian.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - ujian_php
+    networks:
+      - cbt_network
+
+networks:
+  cbt_network:
+    external: true # Assumes 'cbt_network' already exists for MariaDB
