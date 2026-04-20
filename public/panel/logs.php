@@ -97,7 +97,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         $is_suspicious = ($log['country'] !== 'Indonesia' && $log['country'] !== 'Local/Private') || $log['is_bot']; 
                                     ?>
                                     <tr class="<?php echo $is_suspicious ? 'table-danger' : ''; ?>">
-                                        <td class="fw-bold"><?php echo date('d/m H:i:s', strtotime($log['created_at'])); ?></td>
+                                        <td class="text-muted" style="font-size: 0.75rem; white-space: nowrap;"><?php echo date('d/m H:i:s', strtotime($log['created_at'])); ?></td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <code class="<?php echo $is_suspicious ? 'text-danger fw-bold' : 'text-dark'; ?>"><?php echo $log['ip_address']; ?></code>
@@ -228,7 +228,7 @@ function renderLogs(data) {
         
         return `
             <tr class="${is_suspicious ? 'table-danger' : ''}">
-                <td class="fw-bold">${timeStr}</td>
+                <td class="text-muted" style="font-size: 0.75rem; white-space: nowrap;">${timeStr}</td>
                 <td>
                     <div class="d-flex align-items-center gap-2">
                         <code class="${is_suspicious ? 'text-danger fw-bold' : 'text-dark'}">${log.ip_address}</code>
