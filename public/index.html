@@ -143,11 +143,13 @@
                 localStorage.setItem('theme', 'light');
                 document.cookie = "theme=light; path=/; max-age=31536000";
                 themeToggle.innerHTML = '<i class="bi bi-moon-stars"></i>';
+                logEvent('theme_light', currentSemester);
             } else {
                 document.body.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
                 document.cookie = "theme=dark; path=/; max-age=31536000";
                 themeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+                logEvent('theme_dark', currentSemester);
             }
         });
 
@@ -158,6 +160,7 @@
                 '<i class="bi bi-eye-slash"></i> Sembunyikan Hari Lain' : 
                 '<i class="bi bi-eye"></i> Tampilkan Semua Hari';
             renderTable(currentData);
+            logEvent(isEvaluationMode ? 'view_all_days' : 'view_today_only', currentSemester);
         });
 
         // Set Current Date
@@ -463,8 +466,8 @@
         let searchTimeout;
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
+            const term = e.target.value.toLowerCase();
             searchTimeout = setTimeout(() => {
-                const term = e.target.value.toLowerCase();
                 if (!term) {
                     renderTable(currentData);
                     return;
@@ -475,6 +478,7 @@
                     (i["dosen"] || "").toLowerCase().includes(term)
                 );
                 renderTable(filtered);
+                if (term.length >= 3) logEvent('search', currentSemester);
             }, 300);
         });
 
@@ -571,6 +575,18 @@
                 logEvent('page_load', semesters[0]);
             }
         };
+
+        // Event Delegation for Button Clicks (especially locked ones)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-premium');
+            if (btn && btn.classList.contains('btn-upcoming')) {
+                logEvent('click_locked', currentSemester);
+            } else if (btn && btn.classList.contains('btn-ended')) {
+                logEvent('click_ended', currentSemester);
+            } else if (btn && btn.classList.contains('btn-active')) {
+                logEvent('click_exam_url', currentSemester);
+            }
+        });
 
         initApp();
 
