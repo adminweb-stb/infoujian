@@ -41,9 +41,14 @@
 
         <div class="top-utility-bar">
             <div id="infoHariTanggal" style="display: none;"></div>
-            <button id="evaluationToggle" class="btn-eval" title="Mode Evaluasi">
-                <i class="bi bi-eye"></i> Mode Evaluasi
-            </button>
+            <div class="mode-selector">
+                <button id="showToday" class="btn-mode active">
+                    <i class="bi bi-calendar-check"></i> Hari Ini
+                </button>
+                <button id="showAll" class="btn-mode">
+                    <i class="bi bi-calendar-range"></i> Semua Hari
+                </button>
+            </div>
         </div>
 
         <nav class="nav-tabs" id="semesterTabs">
@@ -154,14 +159,23 @@
             }
         });
 
-        evaluationToggle.addEventListener('click', () => {
-            isEvaluationMode = !isEvaluationMode;
-            evaluationToggle.classList.toggle('active');
-            evaluationToggle.innerHTML = isEvaluationMode ? 
-                '<i class="bi bi-eye-slash"></i> Sembunyikan Hari Lain' : 
-                '<i class="bi bi-eye"></i> Tampilkan Semua Hari';
+        const showTodayBtn = document.getElementById('showToday');
+        const showAllBtn = document.getElementById('showAll');
+
+        showTodayBtn.addEventListener('click', () => {
+            isEvaluationMode = false;
+            showTodayBtn.classList.add('active');
+            showAllBtn.classList.remove('active');
             renderTable(currentData);
-            logEvent(isEvaluationMode ? 'view_all_days' : 'view_today_only', currentSemester);
+            logEvent('view_today_only', currentSemester);
+        });
+
+        showAllBtn.addEventListener('click', () => {
+            isEvaluationMode = true;
+            showAllBtn.classList.add('active');
+            showTodayBtn.classList.remove('active');
+            renderTable(currentData);
+            logEvent('view_all_days', currentSemester);
         });
 
         // Set Current Date
