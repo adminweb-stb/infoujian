@@ -90,7 +90,9 @@
         <footer>
             &copy; <span id="year"></span> Jadwal Ujian Online – PDSI Universitas Satya Terra Bhinneka
         </footer>
-    </div>
+    <button id="scrollToTop" class="scroll-to-top" title="Back to Top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
 
     <script>
         // Core Constants
@@ -616,21 +618,22 @@
 
         // --- Scroll to Top Logic ---
         const scrollToTopBtn = document.getElementById('scrollToTop');
-        window.onscroll = function() {
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                scrollToTopBtn.classList.add('visible');
-            } else {
-                scrollToTopBtn.classList.remove('visible');
-            }
-        };
+        if (scrollToTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
 
-        scrollToTopBtn.onclick = function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Small click feedback logic
+                scrollToTopBtn.style.transform = 'scale(0.8)';
+                setTimeout(() => scrollToTopBtn.style.transform = '', 150);
+            });
+        }
     </script>
-    <button id="scrollToTop" class="scroll-to-top" title="Back to Top">
-        <i class="bi bi-arrow-up"></i>
-    </button>
 </body>
 </html>
