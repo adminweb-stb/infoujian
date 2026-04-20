@@ -8,6 +8,14 @@ date_default_timezone_set('Asia/Jakarta');
 
 require_once '../../core/db.php';
 
+// Migration: Add new columns if they don't exist (Forensics 2.0)
+$check_context = $conn->query("SHOW COLUMNS FROM visitor_logs LIKE 'context'");
+if ($check_context && $check_context->num_rows == 0) {
+    $conn->query("ALTER TABLE visitor_logs ADD COLUMN context TEXT AFTER is_bot");
+    $conn->query("ALTER TABLE visitor_logs ADD COLUMN referrer TEXT AFTER context");
+    $conn->query("ALTER TABLE visitor_logs ADD COLUMN resolution VARCHAR(50) AFTER referrer");
+}
+
 // Fetch Logs (Latest 200)
 $logs = [];
 $res = $conn->query("SELECT * FROM visitor_logs ORDER BY created_at DESC LIMIT 200");
@@ -103,17 +111,17 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         </td>
                                         <td>
                                             <div class="fw-bold">
-                                                <i class="bi bi-display-fill text-muted me-1"></i> <?php echo $log['resolution'] ?: 'N/A'; ?>
+                                                <i class="bi bi-display-fill text-muted me-1"></i> <?php echo $log['resolution'] ?? 'N/A'; ?>
                                             </div>
                                             <div class="text-muted small">
-                                                <?php if ($log['device_type'] == 'Mobile'): ?>
+                                                <?php if (($log['device_type'] ?? '') == 'Mobile'): ?>
                                                     <i class="bi bi-smartphone text-info"></i>
-                                                <?php elseif ($log['device_type'] == 'Tablet'): ?>
+                                                <?php elseif (($log['device_type'] ?? '') == 'Tablet'): ?>
                                                     <i class="bi bi-tablet text-warning"></i>
                                                 <?php else: ?>
                                                     <i class="bi bi-pc-display text-secondary"></i>
                                                 <?php endif; ?>
-                                                <?php echo $log['brand'] ?: 'Generic'; ?> (<?php echo $log['os'] ?: 'OS'; ?>)
+                                                <?php echo $log['brand'] ?? 'Generic'; ?> (<?php echo $log['os'] ?? 'OS'; ?>)
                                             </div>
                                         </td>
                                         <td>
@@ -147,7 +155,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                             </div>
                                         </td>
                                         <td>
-                                            <?php if($log['context']): ?>
+                                            <?php if($log['context'] ?? ''): ?>
                                                 <div class="p-2 rounded bg-light border small text-dark fw-bold">
                                                     <?php echo htmlspecialchars($log['context']); ?>
                                                 </div>
@@ -156,7 +164,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-truncate" style="max-width: 150px;">
-                                            <?php if($log['referrer']): ?>
+                                            <?php if($log['referrer'] ?? ''): ?>
                                                 <a href="<?php echo $log['referrer']; ?>" target="_blank" class="small text-decoration-none text-muted" title="<?php echo $log['referrer']; ?>">
                                                     <?php echo parse_url($log['referrer'], PHP_URL_HOST) ?: $log['referrer']; ?>
                                                 </a>
