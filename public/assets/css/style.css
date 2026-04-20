@@ -818,13 +818,15 @@ footer {
 
 @media (max-width: 768px) {
     .utility-actions {
-        width: 100%;
+        width: auto;
         gap: 0.5rem;
     }
     .btn-eval {
-        flex: 1;
+        flex: none;
+        width: auto;
+        display: inline-flex;
         justify-content: center;
         font-size: 0.75rem;
-        padding: 0.5rem;
+        padding: 0.5rem 1rem;
     }
 }
