@@ -265,6 +265,9 @@ $theme = $_COOKIE['theme'] ?? 'light';
         .live-pulse { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 5px; }
         @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
         .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
+        .btn-indigo { background: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .btn-indigo:hover { background: #4338ca; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .text-indigo-900 { color: #312e81; }
     </style>
 </head>
 
@@ -367,32 +370,7 @@ $theme = $_COOKIE['theme'] ?? 'light';
                         </div>
                     </div>
 
-                    <!-- CSV IMPORT SECTION -->
-                    <div class="glass-card p-4 mb-4">
-                        <h5 class="fw-bold mb-3">📤 Impor Jadwal Baru (CSV)</h5>
-                        <form action="import" method="POST" enctype="multipart/form-data">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-bold">Pilih Semester</label>
-                                    <select name="semester" class="form-select" required>
-                                        <?php foreach (range(1, 8) as $s)
-                                            echo "<option value='$s'>Semester $s</option>"; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-bold">File CSV</label>
-                                    <input type="file" name="csv_file" class="form-control" accept=".csv" required>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary w-100 fw-bold">Impor</button>
-                                </div>
-                            </div>
-                            <div class="mt-2 text-muted small">
-                                Format CSV harus mengikuti: <em>HARI, TANGGAL, SESI, MATAKULIAH, JAM, KELAS, DOSEN,
-                                    LINK_SERVER</em> | <a href="../data/template_jadwal.csv" download>Unduh Template CSV</a>
-                            </div>
-                        </form>
-                    </div>
+
 
                     <!-- MASTER CONFIG SETTINGS -->
                     <div class="glass-card p-4 mb-4 border-primary" style="border-left: 5px solid #4f46e5 !important;">
@@ -438,16 +416,17 @@ $theme = $_COOKIE['theme'] ?? 'light';
                         </form>
                     </div>
 
-                    <!-- DOWNLOAD TEMPLATE -->
-                    <div class="alert alert-info glass-card mb-4 border-0">
-                        <h5 class="fw-bold mb-2">Instruksi Update:</h5>
-                        <ol class="small mb-3">
-                            <li>Siapkan Data di Excel sesuai kolom template.</li>
-                            <li>Simpan/Save As sebagai file <strong>CSV (.csv)</strong>.</li>
-                            <li>Klik Upload di bawah sesuai Semester.</li>
-                        </ol>
-                        <a href="../data/template_jadwal.csv" class="btn btn-sm btn-info text-white fw-bold">Download Template
-                            CSV</a>
+                    <!-- DOWNLOAD TEMPLATE & INSTRUCTIONS -->
+                    <div class="glass-card p-4 mb-4 border-0" style="background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="fw-bold mb-1 text-indigo-900">📝 Panduan Update Data</h5>
+                                <p class="text-muted small mb-0">Pastikan file CSV sesuai template (HARI, TANGGAL, SESI, MATKUL, JAM, KELAS, DOSEN, LINK).</p>
+                            </div>
+                            <a href="../data/template_jadwal.csv" class="btn btn-indigo fw-bold shadow-sm">
+                                <i class="bi bi-download me-1"></i> Download Template CSV
+                            </a>
+                        </div>
                     </div>
 
                     <!-- SEMESTER CARDS -->
