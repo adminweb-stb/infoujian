@@ -42,11 +42,8 @@
         <div class="top-utility-bar">
             <div id="infoHariTanggal" style="display: none;"></div>
             <div class="utility-actions">
-                <button id="showToday" class="btn-eval active">
-                    <i class="bi bi-calendar-check"></i> Hari Ini
-                </button>
-                <button id="showAll" class="btn-eval">
-                    <i class="bi bi-calendar-range"></i> Semua Hari
+                <button id="evaluationToggle" class="btn-eval">
+                    <i class="bi bi-calendar-range"></i> Tampilkan Semua Hari
                 </button>
             </div>
         </div>
@@ -159,23 +156,17 @@
             }
         });
 
-        const showTodayBtn = document.getElementById('showToday');
-        const showAllBtn = document.getElementById('showAll');
+        const evaluationToggle = document.getElementById('evaluationToggle');
 
-        showTodayBtn.addEventListener('click', () => {
-            isEvaluationMode = false;
-            showTodayBtn.classList.add('active');
-            showAllBtn.classList.remove('active');
+        evaluationToggle.addEventListener('click', () => {
+            isEvaluationMode = !isEvaluationMode;
+            evaluationToggle.innerHTML = isEvaluationMode ? 
+                '<i class="bi bi-calendar-check"></i> Tampilkan Hari Ini' : 
+                '<i class="bi bi-calendar-range"></i> Tampilkan Semua Hari';
+            
+            evaluationToggle.classList.toggle('active', isEvaluationMode);
             renderTable(currentData);
-            logEvent('view_today_only', currentSemester);
-        });
-
-        showAllBtn.addEventListener('click', () => {
-            isEvaluationMode = true;
-            showAllBtn.classList.add('active');
-            showTodayBtn.classList.remove('active');
-            renderTable(currentData);
-            logEvent('view_all_days', currentSemester);
+            logEvent(isEvaluationMode ? 'view_all_days' : 'view_today_only', currentSemester);
         });
 
         // Set Current Date
