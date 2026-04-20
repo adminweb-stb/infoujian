@@ -421,7 +421,7 @@
         };
 
         const getStatus = (dateStr, jamRaw, currentTime) => {
-            let status = "Mendatang";
+            let status = "Belum Dimulai";
             let badgeClass = "status-upcoming";
             let clrClass = "";
 
@@ -438,7 +438,7 @@
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
             if (examDate > today) {
-                status = "Mendatang";
+                status = "Belum Dimulai";
             } else if (examDate < today) {
                 status = "Selesai";
                 badgeClass = "status-ended";
