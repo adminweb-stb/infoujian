@@ -43,21 +43,20 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f7f6; color: #333; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); }
-        .live-pulse { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 5px; }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-        .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
-        .micro-text { font-size: 0.65rem; }
-        .text-indigo { color: #4f46e5; }
-        .filter-btn { cursor: pointer; transition: all 0.2s; border: 1px solid #dee2e6; background: #fff; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.8rem; color: #666; }
-        .filter-btn:hover { background: #f8f9fa; border-color: #ced4da; }
-        .filter-btn.active { background: #22c55e; color: #fff; border-color: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2); }
-        .filter-btn.active.btn-danger-active { background: #ef4444; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
-        .search-box { position: relative; max-width: 300px; }
-        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; }
-        .search-box input { padding-left: 35px; border-radius: 10px; border: 1px solid #dee2e6; font-size: 0.85rem; height: 38px; }
-        .search-box input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1e293b; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.3); }
+        .live-pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 8px; }
+        @keyframes pulse { 0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); } 70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .stat-card { transition: transform 0.2s; border-left: 4px solid #4f46e5; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .filter-btn { cursor: pointer; transition: all 0.3s; background: #fff; padding: 0.5rem 1.25rem; border-radius: 999px; border: 1px solid #e2e8f0; font-weight: 600; font-size: 0.8rem; color: #64748b; }
+        .filter-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #4f46e5; }
+        .filter-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .filter-btn.active.btn-danger-active { background: #ef4444; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        .table-responsive { border-radius: 12px; }
+        .table-hover tbody tr:hover { background-color: rgba(79, 70, 229, 0.02) !important; }
+        .ip-link { font-family: 'JetBrains Mono', monospace; text-decoration: none; font-weight: 600; }
+        .ip-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -80,23 +79,61 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                 </div>
             </div>
 
+            <!-- Analytics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="glass-card p-3 stat-card" style="border-left-color: #4f46e5;">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Total Hits (200)</div>
+                        <div class="h4 fw-bold mb-0" id="statHits"><?php echo count($logs); ?></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card p-3 stat-card" style="border-left-color: #ef4444;">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Ancaman Keamanan</div>
+                        <div class="h4 fw-bold text-danger mb-0" id="statSecurity">
+                            <?php 
+                                echo count(array_filter($logs, function($l) { 
+                                    return in_array($l['action'], ['security_alert', 'unauthorized_panel_access', 'login_failed_attempt']); 
+                                })); 
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card p-3 stat-card" style="border-left-color: #10b981;">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Akses Ujian Sukses</div>
+                        <div class="h4 fw-bold text-success mb-0" id="statSuccess">
+                            <?php echo count(array_filter($logs, function($l) { return $l['action'] === 'click_exam_url'; })); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card p-3 stat-card" style="border-left-color: #f59e0b;">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Deteksi Bot</div>
+                        <div class="h4 fw-bold text-warning mb-0" id="statBot"><?php echo count(array_filter($logs, function($l) { return $l['is_bot']; })); ?></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- New Control Bar -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-                <div class="d-flex gap-2" id="filterTabs">
-                    <div class="filter-btn active" data-filter="all">Semua</div>
-                    <div class="filter-btn" data-filter="security" data-active-class="btn-danger-active">⚠️ Keamanan</div>
-                    <div class="filter-btn" data-filter="student">🎓 Mahasiswa</div>
-                    <div class="filter-btn" data-filter="bot">🤖 Bot</div>
-                </div>
-                <div class="search-box flex-grow-1">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="logSearch" class="form-control" placeholder="Cari IP, Aktivitas, atau Target...">
-                </div>
-                <div class="form-check form-switch bg-white px-3 py-1 rounded shadow-sm border m-0 h-100 d-flex align-items-center">
-                    <input class="form-check-input" type="checkbox" id="autoUpdateToggle" style="margin-top: 0;">
-                    <label class="form-check-input-label small fw-bold ms-2 mb-0" for="autoUpdateToggle" style="cursor: pointer;">
-                        <span id="liveStatus"><i class="bi bi-broadcast"></i> Live Update</span>
-                    </label>
+            <div class="glass-card p-3 mb-4 shadow-sm">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex gap-2" id="filterTabs">
+                        <div class="filter-btn active" data-filter="all">Semua</div>
+                        <div class="filter-btn" data-filter="security" data-active-class="btn-danger-active">⚠️ Keamanan</div>
+                        <div class="filter-btn" data-filter="student">🎓 Mahasiswa</div>
+                        <div class="filter-btn" data-filter="bot">🤖 Bot</div>
+                    </div>
+                    <div class="search-box flex-grow-1" style="max-width: 400px; position: relative;">
+                        <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                        <input type="text" id="logSearch" class="form-control" placeholder="Cari IP, Aktivitas, atau Mahasiswa..." style="padding-left: 35px; border-radius: 999px;">
+                    </div>
+                    <div class="form-check form-switch bg-light px-3 py-2 rounded-pill border m-0 d-flex align-items-center">
+                        <input class="form-check-input" type="checkbox" id="autoUpdateToggle" style="cursor: pointer;">
+                        <label class="form-check-input-label small fw-bold ms-2 mb-0" for="autoUpdateToggle" style="cursor: pointer;">
+                            <span id="liveStatus"><i class="bi bi-broadcast"></i> Live Update</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -122,17 +159,19 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         $is_suspicious = ($log['country'] !== 'Indonesia' && $log['country'] !== 'Local/Private') || $log['is_bot']; 
                                     ?>
                                     <tr class="<?php echo $is_suspicious ? 'table-danger' : ''; ?>">
-                                        <td class="text-muted" style="font-size: 0.75rem; white-space: nowrap;"><?php echo date('d/m H:i:s', strtotime($log['created_at'])); ?></td>
+                                        <td class="text-muted" style="font-size: 0.72rem; white-space: nowrap;"><?php echo date('d/m H:i:s', strtotime($log['created_at'])); ?></td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <code class="<?php echo $is_suspicious ? 'text-danger fw-bold' : 'text-dark'; ?>"><?php echo $log['ip_address']; ?></code>
+                                                <a href="https://who.is/whois-ip/ip-address/<?php echo $log['ip_address']; ?>" target="_blank" class="ip-link <?php echo $is_suspicious ? 'text-danger' : 'text-indigo'; ?>">
+                                                    <?php echo $log['ip_address']; ?>
+                                                </a>
                                                 <?php if($log['country'] && $log['country'] !== 'Local/Private'): ?>
                                                     <span class="small text-muted" title="<?php echo $log['country'] . ', ' . $log['city']; ?>">
                                                         📍 <?php echo $log['city'] ?: $log['country']; ?>
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
-                                            <div class="text-muted" style="font-size: 0.75rem;"><?php echo $log['isp'] ?: 'ISP Internal/Localhost'; ?></div>
+                                            <div class="text-muted micro-text"><?php echo $log['isp'] ?: 'ISP Internal/Localhost'; ?></div>
                                         </td>
                                         <td>
                                             <div>
@@ -296,13 +335,13 @@ function renderLogs(data) {
         
         return `
             <tr class="${is_suspicious ? 'table-danger' : ''}">
-                <td class="text-muted" style="font-size: 0.75rem; white-space: nowrap;">${timeStr}</td>
+                <td class="text-muted" style="font-size: 0.72rem; white-space: nowrap;">${timeStr}</td>
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <code class="${is_suspicious ? 'text-danger fw-bold' : 'text-dark'}">${log.ip_address}</code>
+                        <a href="https://who.is/whois-ip/ip-address/${log.ip_address}" target="_blank" class="ip-link ${is_suspicious ? 'text-danger' : 'text-indigo'}">${log.ip_address}</a>
                         ${log.country && log.country !== 'Local/Private' ? `<span class="small text-muted" title="${log.country}, ${log.city}">📍 ${log.city || log.country}</span>` : ''}
                     </div>
-                    <div class="text-muted" style="font-size: 0.75rem;">${log.isp || 'ISP Internal/Localhost'}</div>
+                    <div class="text-muted micro-text">${log.isp || 'ISP Internal/Localhost'}</div>
                 </td>
                 <td>
                     <div><i class="bi bi-display-fill text-muted me-1"></i> ${log.resolution || 'N/A'}</div>
@@ -352,6 +391,12 @@ function renderLogs(data) {
             </tr>
         `;
     }).join('');
+
+    // Update Stats
+    document.getElementById('statHits').innerText = data.length;
+    document.getElementById('statSecurity').innerText = data.filter(l => ['security_alert', 'unauthorized_panel_access', 'login_failed_attempt'].includes(l.action)).length;
+    document.getElementById('statSuccess').innerText = data.filter(l => l.action === 'click_exam_url').length;
+    document.getElementById('statBot').innerText = data.filter(l => l.is_bot == 1).length;
 }
 
 async function clearLogs() {
