@@ -479,12 +479,34 @@
         });
 
         // --- Analytics System ---
-        const logEvent = (action, semester) => {
+        const logEvent = async (action, semester) => {
             try {
+                let model = 'Generic';
+                let brand = 'Generic';
+
+                // Try to get high-entropy client hints (modern Chrome/Android)
+                if (navigator.userAgentData) {
+                    try {
+                        const hints = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'brand']);
+                        if (hints.model) model = hints.model;
+                        
+                        // Check specifically for Oppo/Realme model strings to help the server
+                        if (model.toLowerCase().includes('cph') || model.toLowerCase().includes('rmx')) brand = 'Oppo/Realme';
+                        
+                        // Use provided brands if available
+                        if (navigator.userAgentData.brands && navigator.userAgentData.brands.length > 0) {
+                             const b = navigator.userAgentData.brands.find(x => !x.brand.includes('Not') && !x.brand.includes('Chromium'));
+                             if (b) brand = b.brand;
+                        }
+                    } catch (e) {}
+                }
+
                 const payload = {
                     action: action,
                     semester: semester || 0,
-                    exam_type: activeExam
+                    exam_type: activeExam,
+                    client_model: model,
+                    client_brand: brand
                 };
                 
                 fetch('panel/logger', {

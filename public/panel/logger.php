@@ -100,8 +100,16 @@ if (preg_match('/iphone|ipad/i', $ua)) {
 
 // Fallback logic for Android
 if ($brand === "Generic Device" && $os === "Android") {
-    // Some moden browsers hide the brand, but we know it's Android.
-    $brand = "Android Device";
+    // Check if client payload has better model info
+    $input = json_decode(file_get_contents('php://input'), true);
+    $client_model = $input['client_model'] ?? '';
+    $client_brand = $input['client_brand'] ?? '';
+    
+    if ($client_model && $client_model !== 'Generic') {
+        $brand = (str_contains($client_brand, 'Generic') ? 'Android' : $client_brand) . " (" . $client_model . ")";
+    } else {
+        $brand = "Android Device";
+    }
 }
 
 // Simple Device Type

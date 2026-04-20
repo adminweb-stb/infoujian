@@ -131,6 +131,26 @@ if ($is_logged_in && isset($_GET['api'])) {
             echo json_encode(['status' => 'success', 'msg' => 'Log kunjungan berhasil dibersihkan']);
             exit;
         }
+        if ($api === 'get_stats') {
+             // Re-calculate $logs aggregation
+             $logs = [
+                'today' => 0,
+                'total' => 0,
+                'devices' => ['Mobile' => 0, 'Desktop' => 0, 'Tablet' => 0]
+            ];
+            $res = $conn->query("SELECT COUNT(*) as total FROM visitor_logs WHERE DATE(created_at) = CURDATE()");
+            $logs['today'] = $res->fetch_assoc()['total'];
+
+            $res = $conn->query("SELECT COUNT(*) as total FROM visitor_logs");
+            $logs['total'] = $res->fetch_assoc()['total'];
+
+            $res = $conn->query("SELECT device_type, COUNT(*) as total FROM visitor_logs GROUP BY device_type");
+            while ($row = $res->fetch_assoc()) {
+                $logs['devices'][$row['device_type'] ?? 'Desktop'] = $row['total'];
+            }
+            echo json_encode(['status' => 'success', 'data' => $logs]);
+            exit;
+        }
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'msg' => $e->getMessage()]);
@@ -234,6 +254,9 @@ $theme = $_COOKIE['theme'] ?? 'light';
             font-weight: 800;
             color: #4f46e5;
         }
+        .live-pulse { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 5px; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
     </style>
 </head>
 
@@ -274,7 +297,13 @@ $theme = $_COOKIE['theme'] ?? 'light';
                     <!-- DASHBOARD -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="fw-bold">Admin Panel</h2>
-                        <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="form-check form-switch bg-white px-3 py-1 rounded shadow-sm border me-2">
+                                <input class="form-check-input" type="checkbox" id="autoUpdateToggle">
+                                <label class="form-check-input-label small fw-bold ms-1" for="autoUpdateToggle">
+                                    <span id="liveStatus"><i class="bi bi-broadcast"></i> Live Stats</span>
+                                </label>
+                            </div>
                             <button class="btn btn-outline-secondary btn-sm me-2" onclick="clearLogs()">Hapus Log</button>
                             <a href="?logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
                         </div>
@@ -301,22 +330,21 @@ $theme = $_COOKIE['theme'] ?? 'light';
                         <div class="col-md-4">
                             <div class="glass-card p-3 text-center border-0 bg-white">
                                 <h6 class="text-muted small fw-bold">PENGUNJUNG HARI INI</h6>
-                                <div class="stats-num"><?php echo number_format($logs['today']); ?></div>
+                                <div class="stats-num" id="stat-today"><?php echo number_format($logs['today']); ?></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="glass-card p-3 text-center border-0 bg-white">
                                 <h6 class="text-muted small fw-bold">TOTAL KUNJUNGAN</h6>
-                                <div class="stats-num text-success"><?php echo number_format($logs['total']); ?></div>
+                                <div class="stats-num text-success" id="stat-total"><?php echo number_format($logs['total']); ?></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="glass-card p-3 border-0 bg-white h-100 d-flex flex-column justify-content-center">
                                 <h6 class="text-muted small fw-bold mb-2">PERANGKAT</h6>
                                 <div class="d-flex justify-content-between small">
-                                    <span>📱 Mobile: <strong><?php echo $logs['devices']['Mobile']; ?></strong></span>
-                                    <span>💻 PC:
-                                        <strong><?php echo ($logs['devices']['Desktop'] + $logs['devices']['Tablet']); ?></strong></span>
+                                    <span>📱 Mobile: <strong id="stat-mobile"><?php echo $logs['devices']['Mobile']; ?></strong></span>
+                                    <span>💻 PC: <strong id="stat-pc"><?php echo ($logs['devices']['Desktop'] + $logs['devices']['Tablet']); ?></strong></span>
                                 </div>
                                 <div class="mt-2 pt-2 border-top text-end">
                                     <a href="logs" class="text-decoration-none small fw-bold">Lihat Detail Log →</a>
@@ -738,6 +766,37 @@ $theme = $_COOKIE['theme'] ?? 'light';
         if (window.history.replaceState) {
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+
+        // Live Statistics Update Logic
+        let statsInterval;
+        document.getElementById('autoUpdateToggle').addEventListener('change', function(e) {
+            if (this.checked) {
+                document.getElementById('liveStatus').innerHTML = '<div class="live-pulse"></div> Live Aktif';
+                statsInterval = setInterval(fetchStats, 10000); // 10 seconds
+                fetchStats();
+            } else {
+                document.getElementById('liveStatus').innerHTML = '<i class="bi bi-broadcast"></i> Live Stats';
+                clearInterval(statsInterval);
+            }
+        });
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('./?api=get_stats');
+                const result = await res.json();
+                if (result.status === 'success') {
+                    updateStatsUI(result.data);
+                }
+            } catch (err) {}
+        }
+
+        function updateStatsUI(data) {
+            document.getElementById('stat-today').innerText = data.today.toLocaleString();
+            document.getElementById('stat-total').innerText = data.total.toLocaleString();
+            document.getElementById('stat-mobile').innerText = data.devices.Mobile || 0;
+            const pc = (parseInt(data.devices.Desktop) || 0) + (parseInt(data.devices.Tablet) || 0);
+            document.getElementById('stat-pc').innerText = pc;
         }
     </script>
 </body>
