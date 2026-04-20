@@ -144,8 +144,15 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                         'security_alert' => 'Akses Terlarang (Honeypot)'
                                                     ];
                                                     $action_text = $labels[$log['action']] ?? $log['action'];
+                                                    
+                                                    // Dynamic Badge Color
+                                                    $badge_class = 'bg-primary';
+                                                    if (in_array($log['action'], ['security_alert', 'unauthorized_panel_access', 'login_failed_attempt'])) $badge_class = 'bg-danger';
+                                                    else if (in_array($log['action'], ['click_exam_url', 'login_success'])) $badge_class = 'bg-success';
+                                                    else if (in_array($log['action'], ['click_locked', 'click_ended'])) $badge_class = 'bg-secondary';
+                                                    else if (in_array($log['action'], ['theme_dark', 'theme_light', 'view_all_days', 'view_today_only', 'search'])) $badge_class = 'bg-info';
                                                 ?>
-                                                <span class="badge <?php echo ($log['action'] == 'page_load' || $log['action'] == 'click_exam_url') ? 'bg-success' : 'bg-primary' ?> outline">
+                                                <span class="badge <?php echo $badge_class; ?> outline">
                                                     <?php echo $action_text; ?>
                                                 </span>
                                                 <span class="text-uppercase micro-text fw-bold text-indigo"><?php echo $log['exam_type']; ?></span>
@@ -238,27 +245,32 @@ function renderLogs(data) {
                 </td>
                 <td>
                     <div class="d-flex flex-column gap-1">
-                        <span class="badge ${log.action == 'page_load' || log.action == 'click_exam_url' ? 'bg-success' : 'bg-primary'} outline">
-                            ${(() => {
-                                const labels = {
-                                    'page_load': 'Buka Jadwal',
-                                    'tab_click': 'Lihat Semester ' + (log.semester || ''),
-                                    'theme_dark': 'Ganti Tema: Gelap',
-                                    'theme_light': 'Ganti Tema: Terang',
-                                    'view_all_days': 'Lihat Semua Hari',
-                                    'view_today_only': 'Lihat Hari Ini Saja',
-                                    'search': 'Pencarian',
-                                    'click_locked': 'Akses Ujian (Terkunci)',
-                                    'click_ended': 'Akses Ujian (Selesai)',
-                                    'click_exam_url': 'Klik Masuk Ujian',
-                                    'unauthorized_panel_access': 'Intai Halaman Login',
-                                    'login_failed_attempt': 'Gagal Login (Percobaan)',
-                                    'login_success': 'Login Admin Sukses',
-                                    'security_alert': 'Akses Terlarang (Honeypot)'
-                                };
-                                return labels[log.action] || log.action;
-                            })()}
-                        </span>
+                        ${(() => {
+                            const labels = {
+                                'page_load': 'Buka Jadwal',
+                                'tab_click': 'Lihat Semester ' + (log.semester || ''),
+                                'theme_dark': 'Ganti Tema: Gelap',
+                                'theme_light': 'Ganti Tema: Terang',
+                                'view_all_days': 'Lihat Semua Hari',
+                                'view_today_only': 'Lihat Hari Ini Saja',
+                                'search': 'Pencarian',
+                                'click_locked': 'Akses Ujian (Terkunci)',
+                                'click_ended': 'Akses Ujian (Selesai)',
+                                'click_exam_url': 'Klik Masuk Ujian',
+                                'unauthorized_panel_access': 'Intai Halaman Login',
+                                'login_failed_attempt': 'Gagal Login (Percobaan)',
+                                'login_success': 'Login Admin Sukses',
+                                'security_alert': 'Akses Terlarang (Honeypot)'
+                            };
+                            
+                            let badgeClass = 'bg-primary';
+                            if (['security_alert', 'unauthorized_panel_access', 'login_failed_attempt'].includes(log.action)) badgeClass = 'bg-danger';
+                            else if (['click_exam_url', 'login_success'].includes(log.action)) badgeClass = 'bg-success';
+                            else if (['click_locked', 'click_ended'].includes(log.action)) badgeClass = 'bg-secondary';
+                            else if (['theme_dark', 'theme_light', 'view_all_days', 'view_today_only', 'search'].includes(log.action)) badgeClass = 'bg-info';
+
+                            return `<span class="badge ${badgeClass} outline">${labels[log.action] || log.action}</span>`;
+                        })()}
                         <span class="text-uppercase micro-text fw-bold text-indigo">${log.exam_type}</span>
                         ${log.is_bot == 1 ? '<span class="badge bg-danger"><i class="bi bi-robot"></i> BOT</span>' : ''}
                     </div>
