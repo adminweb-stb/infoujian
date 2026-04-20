@@ -50,6 +50,14 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
         .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
         .micro-text { font-size: 0.65rem; }
         .text-indigo { color: #4f46e5; }
+        .filter-btn { cursor: pointer; transition: all 0.2s; border: 1px solid #dee2e6; background: #fff; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.8rem; color: #666; }
+        .filter-btn:hover { background: #f8f9fa; border-color: #ced4da; }
+        .filter-btn.active { background: #22c55e; color: #fff; border-color: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2); }
+        .filter-btn.active.btn-danger-active { background: #ef4444; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .search-box { position: relative; max-width: 300px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; }
+        .search-box input { padding-left: 35px; border-radius: 10px; border: 1px solid #dee2e6; font-size: 0.85rem; height: 38px; }
+        .search-box input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); }
     </style>
 </head>
 <body>
@@ -64,14 +72,31 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                     <h2 class="fw-bold m-0">Log Kunjungan Detail</h2>
                     <p class="text-muted small m-0">Menampilkan 200 interaksi terbaru dari mahasiswa.</p>
                 </div>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="form-check form-switch bg-white px-3 py-1 rounded shadow-sm border">
-                        <input class="form-check-input" type="checkbox" id="autoUpdateToggle">
-                        <label class="form-check-input-label small fw-bold ms-1" for="autoUpdateToggle">
-                            <span id="liveStatus"><i class="bi bi-broadcast"></i> Live Update</span>
-                        </label>
-                    </div>
-                    <button class="btn btn-outline-danger btn-sm" onclick="clearLogs()">Hapus Semua Log</button>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-success btn-sm fw-bold shadow-sm" onclick="exportToCSV()">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearLogs()">Hapus Log</button>
+                </div>
+            </div>
+
+            <!-- New Control Bar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div class="d-flex gap-2" id="filterTabs">
+                    <div class="filter-btn active" data-filter="all">Semua</div>
+                    <div class="filter-btn" data-filter="security" data-active-class="btn-danger-active">⚠️ Keamanan</div>
+                    <div class="filter-btn" data-filter="student">🎓 Mahasiswa</div>
+                    <div class="filter-btn" data-filter="bot">🤖 Bot</div>
+                </div>
+                <div class="search-box flex-grow-1">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="logSearch" class="form-control" placeholder="Cari IP, Aktivitas, atau Target...">
+                </div>
+                <div class="form-check form-switch bg-white px-3 py-1 rounded shadow-sm border m-0 h-100 d-flex align-items-center">
+                    <input class="form-check-input" type="checkbox" id="autoUpdateToggle" style="margin-top: 0;">
+                    <label class="form-check-input-label small fw-bold ms-2 mb-0" for="autoUpdateToggle" style="cursor: pointer;">
+                        <span id="liveStatus"><i class="bi bi-broadcast"></i> Live Update</span>
+                    </label>
                 </div>
             </div>
 
@@ -193,6 +218,27 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
 
 <script>
 let updateInterval;
+let allLogs = <?php echo json_encode($logs); ?>;
+let currentFilter = 'all';
+let searchKeyword = '';
+
+// Filter Handling
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'btn-danger-active'));
+        this.classList.add('active');
+        if (this.dataset.activeClass) this.classList.add(this.dataset.activeClass);
+        
+        currentFilter = this.dataset.filter;
+        renderLogs(allLogs);
+    });
+});
+
+// Search Handling
+document.getElementById('logSearch').addEventListener('input', function(e) {
+    searchKeyword = e.target.value.toLowerCase();
+    renderLogs(allLogs);
+});
 
 document.getElementById('autoUpdateToggle').addEventListener('change', function(e) {
     if (this.checked) {
@@ -210,19 +256,41 @@ async function fetchLogs() {
         const res = await fetch('./logs?api=get_logs_json');
         const result = await res.json();
         if (result.status === 'success') {
-            renderLogs(result.data);
+            allLogs = result.data;
+            renderLogs(allLogs);
         }
     } catch (err) {}
 }
 
 function renderLogs(data) {
     const tbody = document.getElementById('logTableBody');
-    if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center p-5 text-muted">Belum ada data log tersimpan.</td></tr>';
+    
+    // Apply Filters
+    let filtered = data.filter(log => {
+        // 1. Categorical Filter
+        if (currentFilter === 'security') {
+            const is_sec = ['security_alert', 'unauthorized_panel_access', 'login_failed_attempt'].includes(log.action) || log.is_bot == 1;
+            if (!is_sec) return false;
+        } else if (currentFilter === 'bot') {
+            if (log.is_bot != 1) return false;
+        } else if (currentFilter === 'student') {
+            if (log.is_bot == 1) return false;
+        }
+
+        // 2. Search Keyword
+        if (searchKeyword) {
+            const text = (log.ip_address + log.action + log.context + log.brand + log.os).toLowerCase();
+            if (!text.includes(searchKeyword)) return false;
+        }
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center p-5 text-muted">Tidak ada data yang cocok dengan filter ini.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = data.map(log => {
+    tbody.innerHTML = filtered.map(log => {
         const is_suspicious = (log.country !== 'Indonesia' && log.country !== 'Local/Private') || log.is_bot == 1;
         const timeStr = new Date(log.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit'}) + ' ' + new Date(log.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
         
@@ -297,6 +365,36 @@ async function clearLogs() {
     } catch(err) {
         alert('Gagal membersihkan log.');
     }
+}
+
+function exportToCSV() {
+    if (allLogs.length === 0) return alert('Tidak ada data untuk diekspor');
+    
+    let csv = 'Waktu,IP Address,Lokasi,ISP,Perangkat,OS,Resolusi,Aksi,Target/Context,Referrer\n';
+    allLogs.forEach(log => {
+        const time = log.created_at;
+        const ip = log.ip_address;
+        const loc = (log.city || log.country || 'Unknown').replace(/,/g, '');
+        const isp = (log.isp || '').replace(/,/g, '');
+        const dev = log.brand || 'Generic';
+        const os = log.os || 'OS';
+        const res = log.resolution || 'N/A';
+        const action = log.action;
+        const ctx = (log.context || '-').replace(/,/g, '|').replace(/\n/g, ' ');
+        const ref = (log.referrer || '-').replace(/,/g, '');
+        
+        csv += `${time},${ip},${loc},${isp},${dev},${os},${res},${action},${ctx},${ref}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `log_ujian_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 </script>
 
