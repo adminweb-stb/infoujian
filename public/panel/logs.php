@@ -4,6 +4,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: ./");
     exit;
 }
+date_default_timezone_set('Asia/Jakarta');
 
 require_once '../../core/db.php';
 

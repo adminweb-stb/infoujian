@@ -6,6 +6,9 @@
 // Disable error reporting for silent background operation
 error_reporting(0);
 
+// Set default timezone to Asia/Jakarta (WIB)
+date_default_timezone_set('Asia/Jakarta');
+
 // SECURITY: Cloaking - Hide from direct browser access (GET)
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(404);
@@ -83,7 +86,7 @@ if (preg_match('/iphone|ipad/i', $ua)) {
     $brand = "Samsung";
 } else if (preg_match('/xiaomi|mi |redmi/i', $ua)) {
     $brand = "Xiaomi";
-} else if (preg_match('/oppo|cph|paj/i', $ua)) {
+} else if (preg_match('/oppo|cph|paj|pks|pkm|pb/i', $ua)) {
     $brand = "Oppo";
 } else if (preg_match('/vivo/i', $ua)) {
     $brand = "Vivo";
