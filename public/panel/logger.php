@@ -95,6 +95,12 @@ if (preg_match('/iphone|ipad/i', $ua)) {
     $brand = "PC / Laptop";
 }
 
+// Fallback logic for Android
+if ($brand === "Generic Device" && $os === "Android") {
+    // Some moden browsers hide the brand, but we know it's Android.
+    $brand = "Android Device";
+}
+
 // Simple Device Type
 $device = "Desktop";
 if (preg_match('/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i', $ua)) {
@@ -128,9 +134,11 @@ if ($ip !== '127.0.0.1' && !str_starts_with($ip, '192.168.') && !str_starts_with
     }
 }
 
-$exam_type = $_POST['exam_type'] ?? 'unknown';
-$semester = (int)($_POST['semester'] ?? 0);
-$action = $_POST['action'] ?? 'page_load';
+// Extract payload
+$input = json_decode(file_get_contents('php://input'), true);
+$exam_type = $input['exam_type'] ?? $_POST['exam_type'] ?? 'unknown';
+$semester = (int)($input['semester'] ?? $_POST['semester'] ?? 0);
+$action = $input['action'] ?? $_POST['action'] ?? 'page_load';
 
 // 3. Log to DB
 $stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
