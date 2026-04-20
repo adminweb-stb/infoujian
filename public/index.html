@@ -278,10 +278,9 @@
                 );
             } else if (!isEvaluationMode) {
                 filtered = data.filter(item => {
-                    // Match by full date string or relative day name
-                    const itemHari = (item["hari"] || "").split(',')[0].trim().toLowerCase();
                     const itemTanggal = item["tanggal"] || "";
-                    return itemTanggal === displayDateStr || itemHari === displayDayName || itemHari === "hari ini";
+                    // Normalize date mapping for robust comparison
+                    return itemTanggal === displayDateStr;
                 });
             }
 
@@ -438,13 +437,20 @@
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
             if (examDate > today) {
-                status = "Belum Dimulai";
+                // Future Date: Add date info to badge for clarity
+                const [d, m] = dateStr.split('/');
+                const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                status = `Belum Dimulai (${d} ${monthNames[parseInt(m)]})`;
+                badgeClass = "status-future"; // Distant future color
+                clrClass = "card-future";
             } else if (examDate < today) {
                 status = "Selesai";
                 badgeClass = "status-ended";
                 clrClass = "card-ended row-ended";
             } else {
                 // Same day: Check time
+                status = "Belum Dimulai";
+                badgeClass = "status-upcoming"; // Today's upcoming color
                 if (jamRaw && jamRaw.includes("-")) {
                     const [mulai, selesai] = jamRaw.split("-").map(j => parseFloat(j.trim().replace(":", ".").replace(",", ".")));
                     if (currentTime >= mulai && currentTime <= selesai) {

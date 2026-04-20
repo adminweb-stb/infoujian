@@ -70,7 +70,11 @@ h1 {
 
 .status-active { background: var(--clr-active); color: white; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2); }
 .status-upcoming { background: var(--clr-upcoming); color: white; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2); }
+.status-future { background: rgba(79, 70, 229, 0.1); color: var(--clr-upcoming); border: 1px solid var(--clr-upcoming); }
 .status-ended { background: var(--clr-ended); color: white; opacity: 0.8; }
+
+.card-future { opacity: 0.9; }
+.card-ended { opacity: 0.7; }
 
 /* Tabs */
 .nav-tabs {
