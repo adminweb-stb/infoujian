@@ -1,17 +1,16 @@
 <?php
 /**
- * SECURITY SHIELD - HONEYPOT 
+ * SECURITY SHIELD - HONEYPOT v2.0
  * Captures unauthorized access to sensitive/admin paths
  */
 
 define('INTERNAL_LOG', true);
-$log_action = 'security_alert';
-$log_exam_type = 'security_threat';
+require_once 'logger.php';
 
 // Log the attempt
-include 'logger.php';
+run_visitor_logger('security_alert', 'security_threat');
 
 // Disguise: Show a 404 page
-http_response_code(404);
+header("HTTP/1.1 404 Not Found");
 include '../404.html';
 exit;

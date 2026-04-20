@@ -3,11 +3,9 @@ session_start();
 
 // --- CONFIGURATION ---
 define('INTERNAL_LOG', true);
+require_once 'logger.php';
 function log_admin_security($action) {
-    global $log_action, $log_exam_type;
-    $log_action = $action;
-    $log_exam_type = 'admin_panel';
-    include_once 'logger.php';
+    run_visitor_logger($action, 'admin_panel');
 }
 
 // Hash generated with: password_hash('YthLq7FLuVk3f7U8', PASSWORD_BCRYPT)
