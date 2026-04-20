@@ -39,7 +39,12 @@
         </header>
 
 
-        <div id="infoHariTanggal" style="display: none;"></div>
+        <div class="top-utility-bar">
+            <div id="infoHariTanggal" style="display: none;"></div>
+            <button id="evaluationToggle" class="btn-eval" title="Mode Evaluasi">
+                <i class="bi bi-eye"></i> Mode Evaluasi
+            </button>
+        </div>
 
         <nav class="nav-tabs" id="semesterTabs">
             <a href="#" class="nav-link active">Smt -</a>
@@ -50,11 +55,7 @@
             <input type="text" id="searchInput" class="search-input" placeholder="Cari Mata Kuliah, Kelas, atau Dosen...">
         </div>
 
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <button id="evaluationToggle" class="btn-eval">
-                <i class="bi bi-eye"></i> Tampilkan Semua Hari
-            </button>
-        </div>
+
 
         <div id="tableWrapper" class="glass-card fade-in-up" style="display: none;">
             <!-- View 1: Desktop Table (Hidden on Mobile via CSS) -->
