@@ -478,12 +478,12 @@
                     (i["dosen"] || "").toLowerCase().includes(term)
                 );
                 renderTable(filtered);
-                if (term.length >= 3) logEvent('search', currentSemester);
+                if (term.length >= 3) logEvent('search', currentSemester, term);
             }, 300);
         });
 
         // --- Analytics System ---
-        const logEvent = async (action, semester) => {
+        const logEvent = async (action, semester, context = '') => {
             try {
                 let model = 'Generic';
                 let brand = 'Generic';
@@ -493,11 +493,7 @@
                     try {
                         const hints = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'brand']);
                         if (hints.model) model = hints.model;
-                        
-                        // Check specifically for Oppo/Realme model strings to help the server
                         if (model.toLowerCase().includes('cph') || model.toLowerCase().includes('rmx')) brand = 'Oppo/Realme';
-                        
-                        // Use provided brands if available
                         if (navigator.userAgentData.brands && navigator.userAgentData.brands.length > 0) {
                              const b = navigator.userAgentData.brands.find(x => !x.brand.includes('Not') && !x.brand.includes('Chromium'));
                              if (b) brand = b.brand;
@@ -510,7 +506,9 @@
                     semester: semester || 0,
                     exam_type: activeExam,
                     client_model: model,
-                    client_brand: brand
+                    client_brand: brand,
+                    context: context,
+                    resolution: `${screen.width}x${screen.height}`
                 };
                 
                 fetch('panel/logger', {
@@ -579,12 +577,21 @@
         // Event Delegation for Button Clicks (especially locked ones)
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-premium');
-            if (btn && btn.classList.contains('btn-upcoming')) {
-                logEvent('click_locked', currentSemester);
-            } else if (btn && btn.classList.contains('btn-ended')) {
-                logEvent('click_ended', currentSemester);
-            } else if (btn && btn.classList.contains('btn-active')) {
-                logEvent('click_exam_url', currentSemester);
+            if (btn) {
+                // Find Matkul name from parent card or row
+                let matkul = '';
+                const card = e.target.closest('.exam-card');
+                const row = e.target.closest('.table-row-premium');
+                if (card) matkul = card.querySelector('.card-title')?.textContent;
+                else if (row) matkul = row.querySelector('td:nth-child(3)')?.textContent;
+
+                if (btn.classList.contains('btn-upcoming')) {
+                    logEvent('click_locked', currentSemester, matkul);
+                } else if (btn.classList.contains('btn-ended')) {
+                    logEvent('click_ended', currentSemester, matkul);
+                } else if (btn.classList.contains('btn-active')) {
+                    logEvent('click_exam_url', currentSemester, matkul);
+                }
             }
         });
 

@@ -40,6 +40,8 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
         .live-pulse { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 5px; }
         @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
         .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
+        .micro-text { font-size: 0.65rem; }
+        .text-indigo { color: #4f46e5; }
     </style>
 </head>
 <body>
@@ -72,9 +74,10 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                             <tr>
                                 <th>Waktu</th>
                                 <th>IP & Lokasi / ISP</th>
-                                <th>Perangkat & OS</th>
-                                <th>Jenis Ujian</th>
+                                <th>Layar & Perangkat</th>
                                 <th>Aktivitas Mahasiswa / Bot</th>
+                                <th>Target / Info Tambahan</th>
+                                <th>Asal (Referrer)</th>
                             </tr>
                         </thead>
                         <tbody id="logTableBody">
@@ -100,6 +103,9 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         </td>
                                         <td>
                                             <div class="fw-bold">
+                                                <i class="bi bi-display-fill text-muted me-1"></i> <?php echo $log['resolution'] ?: 'N/A'; ?>
+                                            </div>
+                                            <div class="text-muted small">
                                                 <?php if ($log['device_type'] == 'Mobile'): ?>
                                                     <i class="bi bi-smartphone text-info"></i>
                                                 <?php elseif ($log['device_type'] == 'Tablet'): ?>
@@ -107,12 +113,8 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                 <?php else: ?>
                                                     <i class="bi bi-pc-display text-secondary"></i>
                                                 <?php endif; ?>
-                                                <?php echo $log['brand'] ?: 'Generic'; ?>
+                                                <?php echo $log['brand'] ?: 'Generic'; ?> (<?php echo $log['os'] ?: 'OS'; ?>)
                                             </div>
-                                            <div class="text-muted small"><?php echo $log['os'] ?: 'OS Unknown'; ?></div>
-                                        </td>
-                                        <td>
-                                            <span class="text-uppercase small fw-bold text-primary"><?php echo $log['exam_type']; ?></span>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column gap-1">
@@ -124,7 +126,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                         'theme_light' => 'Ganti Tema: Terang',
                                                         'view_all_days' => 'Lihat Semua Hari',
                                                         'view_today_only' => 'Lihat Hari Ini Saja',
-                                                        'search' => 'Melakukan Pencarian',
+                                                        'search' => 'Pencarian',
                                                         'click_locked' => 'Akses Ujian (Terkunci)',
                                                         'click_ended' => 'Akses Ujian (Selesai)',
                                                         'click_exam_url' => 'Klik Masuk Ujian',
@@ -138,10 +140,29 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                 <span class="badge <?php echo ($log['action'] == 'page_load' || $log['action'] == 'click_exam_url') ? 'bg-success' : 'bg-primary' ?> outline">
                                                     <?php echo $action_text; ?>
                                                 </span>
+                                                <span class="text-uppercase micro-text fw-bold text-indigo"><?php echo $log['exam_type']; ?></span>
                                                 <?php if($log['is_bot']): ?>
-                                                    <span class="badge bg-danger"><i class="bi bi-robot"></i> BOT/CRAWLER</span>
+                                                    <span class="badge bg-danger"><i class="bi bi-robot"></i> BOT</span>
                                                 <?php endif; ?>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <?php if($log['context']): ?>
+                                                <div class="p-2 rounded bg-light border small text-dark fw-bold">
+                                                    <?php echo htmlspecialchars($log['context']); ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted small italic">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-truncate" style="max-width: 150px;">
+                                            <?php if($log['referrer']): ?>
+                                                <a href="<?php echo $log['referrer']; ?>" target="_blank" class="small text-decoration-none text-muted" title="<?php echo $log['referrer']; ?>">
+                                                    <?php echo parse_url($log['referrer'], PHP_URL_HOST) ?: $log['referrer']; ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-muted small">-</span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -201,13 +222,12 @@ function renderLogs(data) {
                     <div class="text-muted" style="font-size: 0.75rem;">${log.isp || 'ISP Internal/Localhost'}</div>
                 </td>
                 <td>
-                    <div class="fw-bold">
+                    <div class="fw-bold"><i class="bi bi-display-fill text-muted me-1"></i> ${log.resolution || 'N/A'}</div>
+                    <div class="text-muted small">
                         ${log.device_type == 'Mobile' ? '<i class="bi bi-smartphone text-info"></i>' : (log.device_type == 'Tablet' ? '<i class="bi bi-tablet text-warning"></i>' : '<i class="bi bi-pc-display text-secondary"></i>')}
-                        ${log.brand || 'Generic'}
+                        ${log.brand || 'Generic'} (${log.os || 'OS'})
                     </div>
-                    <div class="text-muted small">${log.os || 'OS Unknown'}</div>
                 </td>
-                <td><span class="text-uppercase small fw-bold text-primary">${log.exam_type}</span></td>
                 <td>
                     <div class="d-flex flex-column gap-1">
                         <span class="badge ${log.action == 'page_load' || log.action == 'click_exam_url' ? 'bg-success' : 'bg-primary'} outline">
@@ -219,7 +239,7 @@ function renderLogs(data) {
                                     'theme_light': 'Ganti Tema: Terang',
                                     'view_all_days': 'Lihat Semua Hari',
                                     'view_today_only': 'Lihat Hari Ini Saja',
-                                    'search': 'Melakukan Pencarian',
+                                    'search': 'Pencarian',
                                     'click_locked': 'Akses Ujian (Terkunci)',
                                     'click_ended': 'Akses Ujian (Selesai)',
                                     'click_exam_url': 'Klik Masuk Ujian',
@@ -231,8 +251,15 @@ function renderLogs(data) {
                                 return labels[log.action] || log.action;
                             })()}
                         </span>
-                        ${log.is_bot == 1 ? '<span class="badge bg-danger"><i class="bi bi-robot"></i> BOT/CRAWLER</span>' : ''}
+                        <span class="text-uppercase micro-text fw-bold text-indigo">${log.exam_type}</span>
+                        ${log.is_bot == 1 ? '<span class="badge bg-danger"><i class="bi bi-robot"></i> BOT</span>' : ''}
                     </div>
+                </td>
+                <td>
+                    ${log.context ? `<div class="p-2 rounded bg-light border small text-dark fw-bold">${log.context}</div>` : '<span class="text-muted small italic">-</span>'}
+                </td>
+                <td class="text-truncate" style="max-width: 150px;">
+                    ${log.referrer ? `<a href="${log.referrer}" target="_blank" class="small text-decoration-none text-muted">${new URL(log.referrer).hostname || log.referrer}</a>` : '<span class="text-muted small">-</span>'}
                 </td>
             </tr>
         `;

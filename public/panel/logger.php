@@ -1,13 +1,13 @@
 <?php
 /**
- * API LOGGER v2.5 - Advanced Visitor Forensics & Geo-Analytics
- * Now supports internal calls and modular execution.
+ * API LOGGER v2.6 - Advanced Forensic Analytics
+ * Supports contextual data, referrers, and screen resolution.
  */
 
 // Global configuration
 date_default_timezone_set('Asia/Jakarta');
 
-function run_visitor_logger($custom_action = null, $custom_exam = null, $custom_sem = 0) {
+function run_visitor_logger($custom_action = null, $custom_exam = null, $custom_sem = 0, $custom_context = null) {
     global $conn; // Access the DB connection from db.php
     
     // 1. Ensure Table Schema is modern
@@ -25,8 +25,19 @@ function run_visitor_logger($custom_action = null, $custom_exam = null, $custom_
         semester INT,
         action VARCHAR(50),
         is_bot TINYINT(1) DEFAULT 0,
+        context TEXT,
+        referrer TEXT,
+        resolution VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
+
+    // Migration: Add new columns if they don't exist (Forensics 2.0)
+    $check_context = $conn->query("SHOW COLUMNS FROM visitor_logs LIKE 'context'");
+    if ($check_context->num_rows == 0) {
+        $conn->query("ALTER TABLE visitor_logs ADD COLUMN context TEXT AFTER is_bot");
+        $conn->query("ALTER TABLE visitor_logs ADD COLUMN referrer TEXT AFTER context");
+        $conn->query("ALTER TABLE visitor_logs ADD COLUMN resolution VARCHAR(50) AFTER referrer");
+    }
 
     // 2. Capture Identity
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -100,15 +111,23 @@ function run_visitor_logger($custom_action = null, $custom_exam = null, $custom_
         }
     }
 
-    // Determine Action & Exam Type
+    // Determine Action & Exam Type & Referrer & Target
     $exam_type = $input['exam_type'] ?? $_POST['exam_type'] ?? $custom_exam ?? 'unknown';
     $semester = (int)($input['semester'] ?? $_POST['semester'] ?? $custom_sem ?? 0);
     $action = $input['action'] ?? $_POST['action'] ?? $custom_action ?? 'page_load';
+    $context = $input['context'] ?? $custom_context ?? '';
+    // If it's a security alert and context is empty, use REQUEST_URI
+    if ($action === 'security_alert' && empty($context)) {
+        $context = $_SERVER['REQUEST_URI'] ?? '';
+    }
+    
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+    $resolution = $input['resolution'] ?? '';
 
     // Log to DB
     $now = date('Y-m-d H:i:s');
-    $stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssssssisis", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot, $now);
+    $stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot, context, referrer, resolution, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssissssss", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot, $context, $referrer, $resolution, $now);
     return $stmt->execute();
 }
 
