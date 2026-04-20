@@ -127,7 +127,11 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                         'search' => 'Melakukan Pencarian',
                                                         'click_locked' => 'Akses Ujian (Terkunci)',
                                                         'click_ended' => 'Akses Ujian (Selesai)',
-                                                        'click_exam_url' => 'Klik Masuk Ujian'
+                                                        'click_exam_url' => 'Klik Masuk Ujian',
+                                                        'unauthorized_panel_access' => 'Intai Halaman Login',
+                                                        'login_failed_attempt' => 'Gagal Login (Percobaan)',
+                                                        'login_success' => 'Login Admin Sukses',
+                                                        'security_alert' => 'Akses Terlarang (Honeypot)'
                                                     ];
                                                     $action_text = $labels[$log['action']] ?? $log['action'];
                                                 ?>
@@ -218,7 +222,11 @@ function renderLogs(data) {
                                     'search': 'Melakukan Pencarian',
                                     'click_locked': 'Akses Ujian (Terkunci)',
                                     'click_ended': 'Akses Ujian (Selesai)',
-                                    'click_exam_url': 'Klik Masuk Ujian'
+                                    'click_exam_url': 'Klik Masuk Ujian',
+                                    'unauthorized_panel_access': 'Intai Halaman Login',
+                                    'login_failed_attempt': 'Gagal Login (Percobaan)',
+                                    'login_success': 'Login Admin Sukses',
+                                    'security_alert': 'Akses Terlarang (Honeypot)'
                                 };
                                 return labels[log.action] || log.action;
                             })()}

@@ -2,6 +2,14 @@
 session_start();
 
 // --- CONFIGURATION ---
+define('INTERNAL_LOG', true);
+function log_admin_security($action) {
+    global $log_action, $log_exam_type;
+    $log_action = $action;
+    $log_exam_type = 'admin_panel';
+    include_once 'logger.php';
+}
+
 // Hash generated with: password_hash('YthLq7FLuVk3f7U8', PASSWORD_BCRYPT)
 define('ADMIN_PASS_HASH', '$2y$10$0qNPDgWeiNDiS/QRk//0auFMUQha/K3YTw/oIJIPOGxbPQnpkyMIO');
 $base_path = '';
@@ -26,10 +34,12 @@ if (!$is_locked && isset($_POST['password'])) {
     if (password_verify($_POST['password'], ADMIN_PASS_HASH)) {
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['login_attempts'] = 0;
+        log_admin_security('login_success');
     } else {
         $_SESSION['login_attempts']++;
         $_SESSION['lockout_time'] = time();
         $error = "Password salah! Sisa percobaan: " . max(0, 5 - $_SESSION['login_attempts']);
+        log_admin_security('login_failed_attempt');
     }
 }
 
@@ -265,7 +275,13 @@ $theme = $_COOKIE['theme'] ?? 'light';
     <div class="container py-5">
         <div class="row justify-content-center">
 
-            <?php if (!$is_logged_in): ?>
+            <?php if (!$is_logged_in): 
+                // Only log the first hit per session to avoid spamming
+                if (!isset($_SESSION['login_hit_logged'])) {
+                    log_admin_security('unauthorized_panel_access');
+                    $_SESSION['login_hit_logged'] = true;
+                }
+            ?>
                 <div class="col-md-6 col-lg-5">
                     <!-- LOGIN FORM -->
                     <div class="glass-card p-5 mt-5">

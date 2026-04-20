@@ -10,7 +10,7 @@ error_reporting(0);
 date_default_timezone_set('Asia/Jakarta');
 
 // SECURITY: Cloaking - Hide from direct browser access (GET)
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if (!defined('INTERNAL_LOG') && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(404);
     include '../404.html';
     exit;
@@ -147,9 +147,9 @@ if ($ip !== '127.0.0.1' && !str_starts_with($ip, '192.168.') && !str_starts_with
 
 // Extract payload
 $input = json_decode(file_get_contents('php://input'), true);
-$exam_type = $input['exam_type'] ?? $_POST['exam_type'] ?? 'unknown';
-$semester = (int)($input['semester'] ?? $_POST['semester'] ?? 0);
-$action = $input['action'] ?? $_POST['action'] ?? 'page_load';
+$exam_type = $input['exam_type'] ?? $_POST['exam_type'] ?? $log_exam_type ?? 'unknown';
+$semester = (int)($input['semester'] ?? $_POST['semester'] ?? $log_semester ?? 0);
+$action = $input['action'] ?? $_POST['action'] ?? $log_action ?? 'page_load';
 
 // 3. Log to DB
 $now = date('Y-m-d H:i:s');
