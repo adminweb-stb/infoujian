@@ -620,17 +620,17 @@
 
         // --- Scroll to Top Logic ---
         const scrollToTopBtn = document.getElementById('scrollToTop');
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
                 scrollToTopBtn.classList.add('visible');
             } else {
                 scrollToTopBtn.classList.remove('visible');
             }
-        });
+        };
 
-        scrollToTopBtn.addEventListener('click', () => {
+        scrollToTopBtn.onclick = function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        };
 
     </script>
     <button id="scrollToTop" class="scroll-to-top" title="Back to Top">
