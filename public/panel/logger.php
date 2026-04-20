@@ -41,7 +41,13 @@ $conn->query("CREATE TABLE IF NOT EXISTS visitor_logs (
 )");
 
 // 2. Capture Identity
-$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+// Support Proxy (Nginx Proxy Manager) Real IP
+if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $ip_list = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $ip = trim($ip_list[0]);
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
 if ($ip === '::1') $ip = '127.0.0.1'; // Localhost fix
 $ua = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
 
@@ -128,7 +134,8 @@ $action = $_POST['action'] ?? 'page_load';
 
 // 3. Log to DB
 $stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sssssssssiis", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot);
+// Format: 9 Strings, 1 Integer, 1 String, 1 Integer (sssssssssisi)
+$stmt->bind_param("sssssssssisi", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot);
 $stmt->execute();
 
 echo json_encode(['status' => 'logged', 'geo' => $country]);
