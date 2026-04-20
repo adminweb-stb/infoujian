@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     
     <!-- Custom Style -->
-    <link rel="stylesheet" href="assets/css/style.css?v=177660666">
+    <link rel="stylesheet" href="assets/css/style.css?v=21042026_final">
 </head>
 <body>
 
@@ -156,18 +156,19 @@
             }
         });
 
-        const evaluationToggle = document.getElementById('evaluationToggle');
-
-        evaluationToggle.addEventListener('click', () => {
-            isEvaluationMode = !isEvaluationMode;
-            evaluationToggle.innerHTML = isEvaluationMode ? 
-                '<i class="bi bi-calendar-check"></i> Tampilkan Hari Ini' : 
-                '<i class="bi bi-calendar-range"></i> Tampilkan Semua Hari';
-            
-            evaluationToggle.classList.toggle('active', isEvaluationMode);
-            renderTable(currentData);
-            logEvent(isEvaluationMode ? 'view_all_days' : 'view_today_only', currentSemester);
-        });
+        // Evaluation Toggle Logic — consolidated
+        if (evaluationToggle) {
+            evaluationToggle.addEventListener('click', () => {
+                isEvaluationMode = !isEvaluationMode;
+                evaluationToggle.innerHTML = isEvaluationMode ? 
+                    '<i class="bi bi-calendar-check"></i> Tampilkan Hari Ini' : 
+                    '<i class="bi bi-calendar-range"></i> Tampilkan Semua Hari';
+                
+                evaluationToggle.classList.toggle('active', isEvaluationMode);
+                renderTable(currentData);
+                logEvent(isEvaluationMode ? 'view_all_days' : 'view_today_only', currentSemester);
+            });
+        }
 
         // Set Current Date
         const updateInfoBar = () => {
