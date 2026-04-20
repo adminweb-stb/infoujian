@@ -110,7 +110,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                             <div class="text-muted" style="font-size: 0.75rem;"><?php echo $log['isp'] ?: 'ISP Internal/Localhost'; ?></div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold">
+                                            <div>
                                                 <i class="bi bi-display-fill text-muted me-1"></i> <?php echo $log['resolution'] ?? 'N/A'; ?>
                                             </div>
                                             <div class="text-muted small">
@@ -163,7 +163,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         </td>
                                         <td>
                                             <?php if($log['context'] ?? ''): ?>
-                                                <div class="p-2 rounded bg-light border small text-dark fw-bold">
+                                                <div class="p-2 rounded bg-light border small text-dark">
                                                     <?php echo htmlspecialchars($log['context']); ?>
                                                 </div>
                                             <?php else: ?>
@@ -237,7 +237,7 @@ function renderLogs(data) {
                     <div class="text-muted" style="font-size: 0.75rem;">${log.isp || 'ISP Internal/Localhost'}</div>
                 </td>
                 <td>
-                    <div class="fw-bold"><i class="bi bi-display-fill text-muted me-1"></i> ${log.resolution || 'N/A'}</div>
+                    <div><i class="bi bi-display-fill text-muted me-1"></i> ${log.resolution || 'N/A'}</div>
                     <div class="text-muted small">
                         ${log.device_type == 'Mobile' ? '<i class="bi bi-smartphone text-info"></i>' : (log.device_type == 'Tablet' ? '<i class="bi bi-tablet text-warning"></i>' : '<i class="bi bi-pc-display text-secondary"></i>')}
                         ${log.brand || 'Generic'} (${log.os || 'OS'})
@@ -276,7 +276,7 @@ function renderLogs(data) {
                     </div>
                 </td>
                 <td>
-                    ${log.context ? `<div class="p-2 rounded bg-light border small text-dark fw-bold">${log.context}</div>` : '<span class="text-muted small italic">-</span>'}
+                    ${log.context ? `<div class="p-2 rounded bg-light border small text-dark">${log.context}</div>` : '<span class="text-muted small italic">-</span>'}
                 </td>
                 <td class="text-truncate" style="max-width: 250px;">
                     ${log.referrer ? `<a href="${log.referrer}" target="_blank" class="small text-decoration-none text-muted"><i class="bi bi-link-45deg"></i> ${new URL(log.referrer).hostname || log.referrer}</a>` : '<span class="text-muted small">-</span>'}
