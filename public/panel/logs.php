@@ -74,8 +74,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                 <th>IP & Lokasi / ISP</th>
                                 <th>Perangkat & OS</th>
                                 <th>Jenis Ujian</th>
-                                <th>Smt</th>
-                                <th>Aksi / Bot</th>
+                                <th>Aktivitas Mahasiswa / Bot</th>
                             </tr>
                         </thead>
                         <tbody id="logTableBody">
@@ -115,11 +114,25 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                         <td>
                                             <span class="text-uppercase small fw-bold text-primary"><?php echo $log['exam_type']; ?></span>
                                         </td>
-                                        <td class="text-center fw-bold"><?php echo $log['semester'] ?: '-'; ?></td>
                                         <td>
                                             <div class="d-flex flex-column gap-1">
-                                                <span class="badge <?php echo $log['action'] == 'page_load' ? 'bg-success' : 'bg-primary' ?> outline">
-                                                    <?php echo $log['action'] == 'page_load' ? 'Buka Halaman' : 'Klik Tab' ?>
+                                                <?php 
+                                                    $labels = [
+                                                        'page_load' => 'Buka Jadwal',
+                                                        'tab_click' => 'Lihat Semester ' . ($log['semester'] ?: ''),
+                                                        'theme_dark' => 'Ganti Tema: Gelap',
+                                                        'theme_light' => 'Ganti Tema: Terang',
+                                                        'view_all_days' => 'Lihat Semua Hari',
+                                                        'view_today_only' => 'Lihat Hari Ini Saja',
+                                                        'search' => 'Melakukan Pencarian',
+                                                        'click_locked' => 'Akses Ujian (Terkunci)',
+                                                        'click_ended' => 'Akses Ujian (Selesai)',
+                                                        'click_exam_url' => 'Klik Masuk Ujian'
+                                                    ];
+                                                    $action_text = $labels[$log['action']] ?? $log['action'];
+                                                ?>
+                                                <span class="badge <?php echo ($log['action'] == 'page_load' || $log['action'] == 'click_exam_url') ? 'bg-success' : 'bg-primary' ?> outline">
+                                                    <?php echo $action_text; ?>
                                                 </span>
                                                 <?php if($log['is_bot']): ?>
                                                     <span class="badge bg-danger"><i class="bi bi-robot"></i> BOT/CRAWLER</span>
@@ -191,11 +204,24 @@ function renderLogs(data) {
                     <div class="text-muted small">${log.os || 'OS Unknown'}</div>
                 </td>
                 <td><span class="text-uppercase small fw-bold text-primary">${log.exam_type}</span></td>
-                <td class="text-center fw-bold">${log.semester || '-'}</td>
                 <td>
                     <div class="d-flex flex-column gap-1">
-                        <span class="badge ${log.action == 'page_load' ? 'bg-success' : 'bg-primary'} outline">
-                            ${log.action == 'page_load' ? 'Buka Halaman' : 'Klik Tab'}
+                        <span class="badge ${log.action == 'page_load' || log.action == 'click_exam_url' ? 'bg-success' : 'bg-primary'} outline">
+                            ${(() => {
+                                const labels = {
+                                    'page_load': 'Buka Jadwal',
+                                    'tab_click': 'Lihat Semester ' + (log.semester || ''),
+                                    'theme_dark': 'Ganti Tema: Gelap',
+                                    'theme_light': 'Ganti Tema: Terang',
+                                    'view_all_days': 'Lihat Semua Hari',
+                                    'view_today_only': 'Lihat Hari Ini Saja',
+                                    'search': 'Melakukan Pencarian',
+                                    'click_locked': 'Akses Ujian (Terkunci)',
+                                    'click_ended': 'Akses Ujian (Selesai)',
+                                    'click_exam_url': 'Klik Masuk Ujian'
+                                };
+                                return labels[log.action] || log.action;
+                            })()}
                         </span>
                         ${log.is_bot == 1 ? '<span class="badge bg-danger"><i class="bi bi-robot"></i> BOT/CRAWLER</span>' : ''}
                     </div>
