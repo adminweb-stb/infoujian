@@ -54,9 +54,9 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
 </head>
 <body>
 
-<div class="container py-5">
+<div class="container-fluid py-5 px-4">
     <div class="row justify-content-center">
-        <div class="col-md-11 col-lg-10">
+        <div class="col-12">
             
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -163,10 +163,10 @@ if (isset($_GET['api']) && $_GET['api'] === 'get_logs_json') {
                                                 <span class="text-muted small italic">-</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-truncate" style="max-width: 150px;">
+                                        <td class="text-truncate" style="max-width: 250px;">
                                             <?php if($log['referrer'] ?? ''): ?>
                                                 <a href="<?php echo $log['referrer']; ?>" target="_blank" class="small text-decoration-none text-muted" title="<?php echo $log['referrer']; ?>">
-                                                    <?php echo parse_url($log['referrer'], PHP_URL_HOST) ?: $log['referrer']; ?>
+                                                    <i class="bi bi-link-45deg"></i> <?php echo parse_url($log['referrer'], PHP_URL_HOST) ?: $log['referrer']; ?>
                                                 </a>
                                             <?php else: ?>
                                                 <span class="text-muted small">-</span>
@@ -266,8 +266,8 @@ function renderLogs(data) {
                 <td>
                     ${log.context ? `<div class="p-2 rounded bg-light border small text-dark fw-bold">${log.context}</div>` : '<span class="text-muted small italic">-</span>'}
                 </td>
-                <td class="text-truncate" style="max-width: 150px;">
-                    ${log.referrer ? `<a href="${log.referrer}" target="_blank" class="small text-decoration-none text-muted">${new URL(log.referrer).hostname || log.referrer}</a>` : '<span class="text-muted small">-</span>'}
+                <td class="text-truncate" style="max-width: 250px;">
+                    ${log.referrer ? `<a href="${log.referrer}" target="_blank" class="small text-decoration-none text-muted"><i class="bi bi-link-45deg"></i> ${new URL(log.referrer).hostname || log.referrer}</a>` : '<span class="text-muted small">-</span>'}
                 </td>
             </tr>
         `;
