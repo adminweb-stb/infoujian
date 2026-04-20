@@ -713,7 +713,7 @@ footer {
 /* --- Scroll to Top Button (Premium Glass) --- */
 .scroll-to-top {
     position: fixed;
-    bottom: 2.5rem;
+    bottom: 4rem;
     right: 2rem;
     width: 3.8rem;
     height: 3.8rem;
