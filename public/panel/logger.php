@@ -144,9 +144,10 @@ $semester = (int)($input['semester'] ?? $_POST['semester'] ?? 0);
 $action = $input['action'] ?? $_POST['action'] ?? 'page_load';
 
 // 3. Log to DB
-$stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-// Format: 9 Strings, 1 Integer, 1 String, 1 Integer (sssssssssisi)
-$stmt->bind_param("sssssssssisi", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot);
+$now = date('Y-m-d H:i:s');
+$stmt = $conn->prepare("INSERT INTO visitor_logs (ip_address, user_agent, os, brand, country, city, isp, device_type, exam_type, semester, action, is_bot, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+// Format: 9 Strings, 1 Integer, 1 String, 1 Integer, 1 String (sssssssssisiss)
+$stmt->bind_param("sssssssssisis", $ip, $ua, $os, $brand, $country, $city, $isp, $device, $exam_type, $semester, $action, $is_bot, $now);
 $stmt->execute();
 
 echo json_encode(['status' => 'logged', 'geo' => $country]);
