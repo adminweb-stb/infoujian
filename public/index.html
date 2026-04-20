@@ -501,11 +501,12 @@
             updateInfoBar();
             showSkeleton();
             
+            let config = {};
             try {
                 // Fetch Master Config
                 const qs = '?v=' + Date.now();
                 const res = await fetch('data/config.json' + qs);
-                const config = await res.json();
+                config = await res.json();
                 activeExam = config.active_exam || 'uts';
                 activePeriod = config.active_period || 'ganjil';
                 
