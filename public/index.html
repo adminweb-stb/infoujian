@@ -40,7 +40,7 @@
 
 
         <div class="top-utility-bar">
-            <div id="infoHariTanggal" style="display: none;"></div>
+            <div id="infoHariTanggal" class="glass-card" style="display: none; padding: 0.5rem 1rem; font-weight: 600; color: var(--primary); font-size: 0.85rem;"></div>
             <div class="utility-actions">
                 <button id="evaluationToggle" class="btn-eval">
                     <i class="bi bi-calendar-range"></i> Tampilkan Semua Hari
@@ -307,7 +307,7 @@
                 const totalItems = focusData.length;
                 focusData = focusData.filter((item, idx) => {
                     // Always show Live and Upcoming
-                    if (item.status === "Berlangsung" || item.status === "Mendatang") return true;
+                    if (item.status === "Berlangsung" || item.status.startsWith("Belum Dimulai")) return true;
                     
                     // Show Selesai ONLY if it's the LAST session of the day
                     const isLastSesi = idx === totalItems - 1;
@@ -552,12 +552,16 @@
                 document.title = titleLabel + " | ST Bhinneka";
             } catch (e) {
                 console.error("Config missing, falling back to defaults.");
+                config = { active_period: 'genap', max_semester: 6 }; // Default Genap
             }
 
             // Generate Nav Tabs Dynamically
             const tabsContainer = document.getElementById('semesterTabs');
+            if (!tabsContainer) return;
+            
             tabsContainer.innerHTML = '';
-            const maxSem = config.max_semester || 8;
+            const maxSem = config.max_semester || 6;
+            const activePeriod = config.active_period || 'genap';
             const semesters = ((activePeriod === 'ganjil') ? [1, 3, 5, 7] : [2, 4, 6, 8]).filter(s => s <= maxSem);
             
             semesters.forEach((sem, idx) => {
