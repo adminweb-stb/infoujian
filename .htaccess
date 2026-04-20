@@ -4,7 +4,7 @@
 
 Options -Indexes
 RewriteEngine On
-RewriteBase /ujian/
+RewriteBase /
 
 # --- 1. CLEAN SEO URLS ---
 
@@ -33,7 +33,7 @@ RewriteRule ^panel/sync$ panel/sync.php [L]
 RewriteRule ^core/ - [R=404,L]
 
 # Force 404 status for direct DB access or internal sync scripts
-RewriteRule ^(core/db\.php|panel/sync\.php|panel/import\.php)$ /ujian/404.html [R=404,L]
+RewriteRule ^(core/db\.php|panel/sync\.php|panel/import\.php)$ /404.html [R=404,L]
 
 # Block sensitive extensions
 <FilesMatch "\.(log|sql|env|bak|old|lama|csv)$">
@@ -69,5 +69,5 @@ RewriteRule ^(core/db\.php|panel/sync\.php|panel/import\.php)$ /ujian/404.html [
 </IfModule>
 
 # --- 6. CUSTOM ERROR HANDLING (403/404) ---
-ErrorDocument 403 /ujian/404.html
-ErrorDocument 404 /ujian/404.html
+ErrorDocument 403 /404.html
+ErrorDocument 404 /404.html

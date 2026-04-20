@@ -4,7 +4,7 @@ session_start();
 // --- CONFIGURATION ---
 // Hash generated with: password_hash('YthLq7FLuVk3f7U8', PASSWORD_BCRYPT)
 define('ADMIN_PASS_HASH', '$2y$10$0qNPDgWeiNDiS/QRk//0auFMUQha/K3YTw/oIJIPOGxbPQnpkyMIO');
-$base_path = '/ujian';
+$base_path = '';
 
 // Brute Force Protection: max 5 attempts
 if (!isset($_SESSION['login_attempts']))
@@ -404,7 +404,7 @@ $theme = $_COOKIE['theme'] ?? 'light';
                             <li>Simpan/Save As sebagai file <strong>CSV (.csv)</strong>.</li>
                             <li>Klik Upload di bawah sesuai Semester.</li>
                         </ol>
-                        <a href="data/template_jadwal.csv" class="btn btn-sm btn-info text-white fw-bold">Download Template
+                        <a href="../data/template_jadwal.csv" class="btn btn-sm btn-info text-white fw-bold">Download Template
                             CSV</a>
                     </div>
 
@@ -444,7 +444,7 @@ $theme = $_COOKIE['theme'] ?? 'light';
                     </div>
 
                     <div class="text-center mt-5">
-                        <a href="/ujian/" target="_blank" class="text-decoration-none">← Lihat Halaman Publik</a>
+                        <a href="/" target="_blank" class="text-decoration-none">← Lihat Halaman Publik</a>
                     </div>
 
                 <?php endif; ?>

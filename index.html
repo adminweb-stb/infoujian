@@ -52,7 +52,7 @@
 
         <div style="text-align: center; margin-bottom: 2rem;">
             <button id="evaluationToggle" class="btn-eval">
-                <i class="bi bi-eye"></i> Tampilkan Semua Hari (Mode Evaluasi)
+                <i class="bi bi-eye"></i> Tampilkan Semua Hari
             </button>
         </div>
 
@@ -156,7 +156,7 @@
             evaluationToggle.classList.toggle('active');
             evaluationToggle.innerHTML = isEvaluationMode ? 
                 '<i class="bi bi-eye-slash"></i> Sembunyikan Hari Lain' : 
-                '<i class="bi bi-eye"></i> Tampilkan Semua Hari (Mode Evaluasi)';
+                '<i class="bi bi-eye"></i> Tampilkan Semua Hari';
             renderTable(currentData);
         });
 
