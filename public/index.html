@@ -114,15 +114,15 @@
         const evaluationToggle = document.getElementById('evaluationToggle');
         let isEvaluationMode = false;
 
-        // Initialize Theme — respects OS preference on first visit
+        // Initialize Theme — default is dark mode
         const getCookie = (name) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         };
         const savedTheme = localStorage.getItem('theme') || getCookie('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const useDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+        // Default to dark unless user has explicitly chosen light
+        const useDark = savedTheme !== 'light';
 
         if (useDark) {
             document.body.setAttribute('data-theme', 'dark');
