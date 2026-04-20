@@ -10,10 +10,10 @@ services:
       - .:/var/www/html
     environment:
       # Database connection environment variables
-      - DB_HOST=global_mariadb
-      - DB_USER=root
-      - DB_PASS=Pd51@2025
-      - DB_NAME=ujian_db
+      - DB_HOST=${DB_HOST:-global_mariadb}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME:-ujian_db}
     networks:
       - cbt_network
 

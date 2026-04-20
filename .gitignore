@@ -12,3 +12,5 @@ index_lama.html_
 # Jangan sync data ini agar jadwal asli di VPS tidak tertimpa dummy lokal
 public/data/*.json
 
+# Rahasia Server (Secrets & Passwords)
+.env
