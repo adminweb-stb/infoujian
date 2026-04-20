@@ -730,12 +730,16 @@ footer {
 
 @media (max-width: 768px) {
     .top-utility-bar {
+        display: flex;
         flex-direction: column;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        width: 100%;
     }
     .btn-eval {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
+        width: fit-content;
     }
 }
