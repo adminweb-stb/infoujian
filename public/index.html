@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portal Jadwal Ujian Online resmi Universitas Satya Terra Bhinneka. Cek jadwal ujian Semester 2, 4, dan 6 secara real-time.">
+    <meta name="description" content="Sistem Informasi Jadwal Ujian resmi Universitas Satya Terra Bhinneka. Cek jadwal ujian Semester 2, 4, dan 6 secara real-time.">
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:image" content="assets/images/logo.png">
     <title>Jadwal Ujian | ST Bhinneka</title>
@@ -28,8 +28,8 @@
                 <div class="header-brand">
                     <img src="assets/images/logo.png" alt="Logo ST Bhinneka">
                     <div class="header-text">
-                        <h1>Jadwal Ujian Online</h1>
-                        <p>Sistem Informasi Jadwal Ujian Online</p>
+                        <h1>Jadwal Ujian</h1>
+                        <p>Sistem Informasi Jadwal Ujian</p>
                     </div>
                 </div>
                 <button id="themeToggle" title="Toggle Dark Mode">
@@ -88,7 +88,7 @@
         <p class="refresh-status" id="refreshStatus"></p>
 
         <footer>
-            &copy; <span id="year"></span> Jadwal Ujian Online – PDSI Universitas Satya Terra Bhinneka
+            &copy; <span id="year"></span> Sistem Informasi Jadwal Ujian – PDSI Universitas Satya Terra Bhinneka
         </footer>
     <button id="vFinalScrollTop" class="premium-back-to-top" title="Back to Top">
         <i class="bi bi-arrow-up"></i>
@@ -96,7 +96,7 @@
 
     <script>
         // Core Constants
-        const CACHE_TIME = 5 * 60 * 1000; // 5 minutes cache
+        const CACHE_TIME = 30 * 1000; // 30 seconds cache (down from 5 mins for instant emergency sync)
         let currentData = [];
         let currentSemester = null;
         let activeExam = 'uts';
@@ -211,10 +211,12 @@
         };
 
         // Fetch Data with Caching
-        const loadData = async (semester) => {
+        const loadData = async (semester, silent = false) => {
             document.documentElement.setAttribute('data-semester-theme', semester);
             currentSemester = semester;
-            showSkeleton();
+            
+            if (!silent) showSkeleton();
+            
             const cacheKey = `data_${activeExam}_sem_${semester}`;
             const cached = localStorage.getItem(cacheKey);
             const cacheTime = localStorage.getItem(`${cacheKey}_time`);
@@ -223,13 +225,15 @@
             // Try Cache First
             if (cached && cacheTime && (now - cacheTime < CACHE_TIME)) {
                 currentData = JSON.parse(cached);
-                renderTable(currentData);
-                refreshStatus.innerText = `Update terakhir: ${new Date(parseInt(cacheTime)).toLocaleTimeString()}`;
+                if (!silent) {
+                    renderTable(currentData);
+                    refreshStatus.innerText = `Update terakhir: ${new Date(parseInt(cacheTime)).toLocaleTimeString()}`;
+                }
                 return;
             }
 
             try {
-                refreshStatus.innerText = "Memperbarui data...";
+                if (!silent) refreshStatus.innerText = "Memperbarui data...";
                 const response = await fetch(`data/${activeExam}_semester-${semester}.json?v=${now}`);
                 if (!response.ok) throw new Error('File data tidak ditemukan');
                 
@@ -239,21 +243,30 @@
                 localStorage.setItem(cacheKey, JSON.stringify(data));
                 localStorage.setItem(`${cacheKey}_time`, now.toString());
                 
+                // Check if data changed to avoid unnecessary DOM repaints during silent mode
+                const dataChanged = JSON.stringify(currentData) !== JSON.stringify(data);
                 currentData = data;
-                renderTable(currentData);
-                refreshStatus.innerText = "Data diperbarui dari server.";
+                
+                if (!silent || dataChanged) {
+                    renderTable(currentData);
+                }
+                if (!silent) refreshStatus.innerText = "Data diperbarui dari server.";
             } catch (err) {
                 console.error('Fetch error:', err);
                 if (cached) {
                     currentData = JSON.parse(cached);
-                    renderTable(currentData);
-                    refreshStatus.innerText = "Gagal menyinkronkan. Menggunakan data cache.";
+                    if (!silent) {
+                        renderTable(currentData);
+                        refreshStatus.innerText = "Gagal menyinkronkan. Menggunakan data cache.";
+                    }
                 } else {
-                    desktopBody.innerHTML = '';
-                    mobileCardList.innerHTML = '';
-                    tableWrapper.style.display = 'block';
-                    noData.style.display = 'block';
-                    refreshStatus.innerText = "Gagal memuat data. Mohon hubungi IT Support.";
+                    if (!silent) {
+                        desktopBody.innerHTML = '';
+                        mobileCardList.innerHTML = '';
+                        tableWrapper.style.display = 'block';
+                        noData.style.display = 'block';
+                        refreshStatus.innerText = "Gagal memuat data. Mohon hubungi IT Support.";
+                    }
                 }
             }
         };
@@ -352,6 +365,19 @@
                 const serverUrl = item["link_server"] || "#";
                 const isBerlangsung = status === 'Berlangsung';
                 const isSelesai = status === 'Selesai';
+                const isOffline = serverUrl === 'OFFLINE';
+
+                let btnHtmlDesktop = '';
+                if (isOffline) {
+                    btnHtmlDesktop = `<span class="btn-premium btn-offline" style="padding:0.5rem; font-size:12px; display:inline-block; text-align:center; letter-spacing:0.05em;"><i class="bi bi-buildings"></i> Offline</span>`;
+                } else {
+                    btnHtmlDesktop = `<a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
+                               ${isBerlangsung ? 'target="_blank"' : ''}
+                               class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}" 
+                               style="padding:0.5rem; font-size:12px">
+                                ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : '<i class="bi bi-lock-fill"></i> Terkunci')}
+                            </a>`;
+                }
 
                 return `
                     ${dateHeader}
@@ -368,12 +394,7 @@
                         <td style="color:var(--text-muted)">${item["dosen"] || '-'}</td>
                         <td>
                             <span class="tooltip-wrapper" ${!isBerlangsung && !isSelesai ? `data-tooltip="Dibuka ${item['tanggal'] || '-'} pukul ${item['jam'] ? item['jam'].split('-')[0].trim() : '-'}"` : ''}>
-                            <a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
-                               ${isBerlangsung ? 'target="_blank"' : ''}
-                               class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}" 
-                               style="padding:0.5rem; font-size:12px">
-                                ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : '<i class="bi bi-lock-fill"></i> Terkunci')}
-                            </a>
+                                ${btnHtmlDesktop}
                             </span>
                         </td>
                     </tr>
@@ -395,6 +416,18 @@
                 const serverUrl = item["link_server"] || "#";
                 const isBerlangsung = status === 'Berlangsung';
                 const isSelesai = status === 'Selesai';
+                const isOffline = serverUrl === 'OFFLINE';
+
+                let btnHtmlMobile = '';
+                if (isOffline) {
+                    btnHtmlMobile = `<span class="btn-premium btn-offline" style="display:block; text-align:center; letter-spacing:0.05em;"><i class="bi bi-buildings"></i> Offline</span>`;
+                } else {
+                    btnHtmlMobile = `<a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
+                           ${isBerlangsung ? 'target="_blank"' : ''}
+                           class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}">
+                           ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : '<i class="bi bi-lock-fill"></i> Terkunci')}
+                        </a>`;
+                }
 
                 return `
                     ${dateHeader}
@@ -416,11 +449,7 @@
                             </div>
                         </div>
                         <span class="tooltip-wrapper" ${!isBerlangsung && !isSelesai ? `data-tooltip="Dibuka ${item['tanggal'] || '-'} pukul ${item['jam'] ? item['jam'].split('-')[0].trim() : '-'}"` : ''}>
-                        <a href="${isBerlangsung ? serverUrl : 'javascript:void(0)'}" 
-                           ${isBerlangsung ? 'target="_blank"' : ''}
-                           class="btn-premium ${isBerlangsung ? 'btn-active' : (isSelesai ? 'btn-ended' : 'btn-upcoming')}">
-                           ${isBerlangsung ? 'Masuk ujian' : (isSelesai ? 'Selesai' : '<i class="bi bi-lock-fill"></i> Terkunci')}
-                        </a>
+                            ${btnHtmlMobile}
                         </span>
                     </div>
                 `;
@@ -615,6 +644,23 @@
         });
 
         initApp();
+
+        // --- SILENT RADAR: Auto-Sync & Auto-Unlock ---
+        // Every 30 seconds, silently fetch updates from server (admin corrections)
+        // AND recalculate time to magically unlock buttons that hit their start time.
+        setInterval(() => {
+            if (currentSemester) {
+                // If data hasn't changed but time has passed, we force a re-render to unlock buttons
+                const prevHtml = desktopBody.innerHTML;
+                loadData(currentSemester, true).then(() => {
+                    // Force a re-render using current cached data just to update Time/Statuses 
+                    // if loadData hit the local cache and didn't repaint.
+                    if (currentData.length > 0) {
+                        renderTable(currentData);
+                    }
+                });
+            }
+        }, 30000);
 
         // --- Scroll to Top Logic (Hard Reset vFinal) ---
         const vFinalBtn = document.getElementById('vFinalScrollTop');

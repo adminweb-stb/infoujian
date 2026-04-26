@@ -49,7 +49,7 @@ foreach ($table_map as $semester => $table_name) {
         continue;
     }
 
-    $sql = "SELECT * FROM $table_name";
+    $sql = "SELECT * FROM $table_name ORDER BY sesi ASC, jam ASC, kelas ASC";
     $result = $conn->query($sql);
 
     if ($result) {

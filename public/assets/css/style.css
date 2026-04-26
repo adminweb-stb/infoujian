@@ -69,9 +69,11 @@ h1 {
 }
 
 .status-active { background: var(--clr-active); color: white; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2); }
-.status-upcoming { background: var(--clr-upcoming); color: white; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2); }
-.status-future { background: rgba(79, 70, 229, 0.25); color: var(--clr-upcoming); border: 1.5px solid var(--clr-upcoming); }
+.status-upcoming { background: var(--clr-upcoming); color: white; box-shadow: 0 2px 8px var(--semester-glow); }
+.status-future { background: transparent; color: var(--clr-upcoming); border: 1.5px solid var(--clr-upcoming); opacity: 0.9; }
 .status-ended { background: var(--clr-ended); color: white; opacity: 0.8; }
+
+[data-theme="dark"] .status-upcoming { box-shadow: 0 2px 8px var(--semester-glow); }
 
 .card-future { opacity: 0.9; }
 .card-ended { opacity: 0.7; }
@@ -256,7 +258,6 @@ footer {
     border-radius: 0.75rem;
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--semester-accent);
     opacity: 0.8;
 }
 
@@ -277,7 +278,6 @@ footer {
 .skeleton-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--semester-accent);
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1.25rem;
@@ -357,7 +357,7 @@ footer {
     
     /* Semantic Colors */
     --clr-active: #10b981;  /* Emerald */
-    --clr-upcoming: #4f46e5; /* Indigo */
+    --clr-upcoming: var(--semester-accent); /* Dynamic Semester Theme */
     --clr-ended: #64748b;    /* Slate */
 }
 
@@ -432,14 +432,10 @@ footer {
 }
 
 .table-row-premium td:first-child { 
-    border-left: 4px solid var(--semester-accent); 
+    border-left: 1px solid var(--glass-border); 
     border-radius: 0.75rem 0 0 0.75rem; 
     transition: border-color 0.3s ease;
 }
-
-/* Strip color follows Semester Theme for Unity */
-.table-row-premium.row-active td:first-child { border-left-color: var(--semester-accent); }
-.table-row-premium.row-ended td:first-child { border-left-color: var(--semester-accent); opacity: 0.6; }
 
 .table-row-premium td:last-child { 
     border-right: 1px solid var(--glass-border); 
@@ -454,7 +450,6 @@ footer {
 .exam-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--semester-accent); /* Branded Strip */
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1.25rem;
@@ -481,6 +476,7 @@ footer {
     color: var(--text-main);
     line-height: 1.4;
     word-break: break-word;
+    letter-spacing: -0.025em; /* Apple-style tight tracking */
 }
 
 .card-meta-header {
@@ -558,10 +554,16 @@ footer {
     cursor: pointer;
 }
 
+@keyframes softPulse {
+    0% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
 .btn-active {
     background: var(--clr-active);
     color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    animation: softPulse 2s infinite;
 }
 
 .btn-upcoming {
@@ -576,9 +578,22 @@ footer {
     cursor: not-allowed;
 }
 
+.btn-offline {
+    background: #f8fafc;
+    border: 1.5px dashed #94a3b8;
+    color: #475569;
+    cursor: default;
+}
+
 [data-theme="dark"] .btn-ended {
     background: #1e293b;
     color: #475569;
+}
+
+[data-theme="dark"] .btn-offline {
+    background: #0f172a;
+    border: 1.5px dashed #475569;
+    color: #94a3b8;
 }
 
 /* Header & Tab refinement */
