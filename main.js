@@ -111,6 +111,7 @@ const loadData = async (semester, silent = false) => {
     if (cached && cacheTime && (now - cacheTime < CACHE_TIME)) {
         currentData = JSON.parse(cached);
         if (!silent) {
+            populateDateFilter(currentData);
             renderTable(currentData);
             if (refreshStatus) refreshStatus.innerText = `Update terakhir: ${new Date(parseInt(cacheTime)).toLocaleTimeString()}`;
         }
@@ -140,6 +141,7 @@ const loadData = async (semester, silent = false) => {
         if (cached) {
             currentData = JSON.parse(cached);
             if (!silent) {
+                populateDateFilter(currentData);
                 renderTable(currentData);
                 if (refreshStatus) refreshStatus.innerText = "Gagal menyinkronkan. Menggunakan data cache.";
             }
