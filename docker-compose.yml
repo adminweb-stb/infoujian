@@ -1,33 +1,21 @@
 version: '3.8'
 
 services:
-  # PHP-FPM Service (Custom build with mysqli)
-  ujian_php:
-    build: .
-    container_name: ujian_php
-    restart: always
-    volumes:
-      - .:/var/www/html
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
-    networks:
-      - ichdsf_default
-
-  # Nginx Service
-  ujian_nginx:
-    image: nginx:alpine
-    container_name: ujian_nginx
+  info_ujian_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: info_ujian_node
     restart: always
     ports:
-      - "${APP_PORT}:80" # Mengambil port dari .env
-    volumes:
-      - .:/var/www/html
-      - ./nginx/ujian.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - ujian_php
+      - "8085:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=36aed57f410a_global_mariadb
+      - DB_USER=root
+      - DB_PASSWORD=IchdsfDB2026!
+      - DB_NAME=stb_ujian_db
+      - PORT=3000
     networks:
       - ichdsf_default
 
