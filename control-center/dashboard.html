@@ -610,7 +610,10 @@
                         <div class="badge ${actionColors[log.action] || 'badge-ghost'} text-[10px] font-bold uppercase">${log.action}</div>
                         ${log.semester ? `<div class="text-[10px] text-slate-400 mt-1">Smt ${log.semester}</div>` : ''}
                     </td>
-                    <td class="hidden lg:table-cell text-[12px] font-mono text-cyan-400 max-w-xs truncate">${log.path || '-'}</td>
+                    <td class="hidden lg:table-cell text-[12px] font-mono text-cyan-400 max-w-xs">
+                        <div class="truncate">${log.path || '-'}</div>
+                        ${log.context && log.context !== 'undefined' ? `<div class="text-[10px] text-fuchsia-400 mt-1 whitespace-normal break-words font-sans"><i class="bi bi-info-circle"></i> ${log.context}</div>` : ''}
+                    </td>
                     <td>
                         <button onclick="deleteLog(${log.id})" class="btn btn-circle btn-ghost btn-xs text-red-400 hover:bg-red-500/20">
                             <i class="bi bi-trash-fill text-lg"></i>
