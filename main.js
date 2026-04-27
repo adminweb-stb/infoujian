@@ -53,7 +53,8 @@ const dateFilter = document.getElementById('dateFilter');
 if (dateFilter) {
     dateFilter.addEventListener('change', () => {
         renderTable(currentData);
-        logEvent('date_filter', currentSemester, dateFilter.value);
+        const selectedText = dateFilter.options[dateFilter.selectedIndex].text;
+        logEvent('date_filter', currentSemester, `Semester ${currentSemester}: ${selectedText}`);
     });
 }
 
@@ -487,7 +488,8 @@ const prodiFilter = document.getElementById('prodiFilter');
 if (prodiFilter) {
     prodiFilter.addEventListener('change', () => {
         renderTable(currentData);
-        logEvent('prodi_filter', currentSemester, prodiFilter.value || 'all');
+        const selectedText = prodiFilter.options[prodiFilter.selectedIndex].text;
+        logEvent('prodi_filter', currentSemester, `Semester ${currentSemester}: ${selectedText}`);
     });
 }
 

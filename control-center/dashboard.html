@@ -600,6 +600,7 @@
                     <td>
                         <div class="font-bold text-white text-sm">${log.ip_address}</div>
                         <div class="text-[11px] text-slate-400">${log.city || '-'}, ${log.country || '-'}</div>
+                        ${log.isp ? `<div class="text-[9px] text-emerald-400 opacity-80 uppercase tracking-wider mt-1 truncate max-w-[120px]" title="${log.isp}"><i class="bi bi-hdd-network"></i> ${log.isp}</div>` : ''}
                     </td>
                     <td>
                         <div class="text-[12px] text-amber-400 font-bold"><i class="bi bi-${log.device_type === 'mobile' ? 'phone' : 'laptop'}"></i> ${log.brand || log.device_type}</div>
