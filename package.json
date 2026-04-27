@@ -1,0 +1,28 @@
+{
+  "name": "ujian-info-2026",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.9.7",
+    "ua-parser-js": "^1.0.37"
+  }
+}

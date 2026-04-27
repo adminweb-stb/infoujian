@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Info Ujian</title>
+    <link rel="shortcut icon" href="/assets/images/favicon.png">
+    <!-- Tailwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #f59e0b; /* Gold/Amber */
+            --sidebar: #0f172a;
+            --bg: #1e293b;
+            --card: rgba(30, 41, 59, 0.6);
+        }
+        body { font-family: 'Outfit', sans-serif; background-color: #111827; }
+        .glass-sidebar { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-card { background: rgba(31, 41, 55, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-active { background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0) 100%); border-left: 3px solid var(--primary); color: white !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-200">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 glass-sidebar hidden md:flex flex-col">
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <i class="bi bi-shield-check text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Control <span class="text-amber-500">X</span></h1>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-1">
+                <div onclick="showSection('overview')" class="nav-btn flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all active-nav" id="nav-overview">
+                    <i class="bi bi-grid-1x2"></i> <span>Overview</span>
+                </div>
+                <div onclick="showSection('schedules')" class="nav-btn flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all" id="nav-schedules">
+                    <i class="bi bi-calendar4-week"></i> <span>Manage Jadwal</span>
+                </div>
+                <div onclick="showSection('security')" class="nav-btn flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all" id="nav-security">
+                    <i class="bi bi-incognito"></i> <span>Security Center</span>
+                </div>
+                <div onclick="showSection('logs')" class="nav-btn flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all" id="nav-logs">
+                    <i class="bi bi-activity"></i> <span>Visitor Logs</span>
+                </div>
+                <div onclick="showSection('users')" class="nav-btn flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all" id="nav-users">
+                    <i class="bi bi-people-fill"></i> <span>Manage Users</span>
+                </div>
+            </nav>
+
+            <div class="p-4 mt-auto border-t border-white/5">
+                <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
+                    <i class="bi bi-power"></i> <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-10 relative">
+            
+            <!-- Top Header -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-1" id="pageTitle">Overview</h2>
+                    <p class="text-slate-400 text-sm">Selamat datang kembali, <span id="welcomeUser" class="text-amber-500 font-bold">Administrator</span>.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="syncData()" class="btn btn-primary btn-sm rounded-lg shadow-lg shadow-amber-500/30">
+                        <i class="bi bi-arrow-repeat"></i> Sync DB to Cache
+                    </button>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <div id="overview-section" class="section-content animate-in fade-in duration-500">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400"><i class="bi bi-people text-xl"></i></div>
+                            <span class="text-sm text-slate-300 font-bold uppercase tracking-wider">Total Visitors</span>
+                        </div>
+                        <h4 class="text-4xl font-bold text-white mb-1" id="stat-visitors">0</h4>
+                        <p class="text-sm text-slate-300">Total hits sejak sistem aktif</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-red-500/10 rounded-xl text-red-400"><i class="bi bi-shield-slash text-xl"></i></div>
+                            <span class="text-sm text-slate-300 font-bold uppercase tracking-wider">Blocked IPs</span>
+                        </div>
+                        <h4 class="text-4xl font-bold text-white mb-1" id="stat-blacklisted">0</h4>
+                        <p class="text-sm text-slate-300">IP mencurigakan dalam penjara</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-amber-500/10 rounded-xl text-amber-500"><i class="bi bi-bug text-xl"></i></div>
+                            <span class="text-sm text-slate-300 font-bold uppercase tracking-wider">Security Alerts</span>
+                        </div>
+                        <h4 class="text-4xl font-bold text-white mb-1" id="stat-intrusions">0</h4>
+                        <p class="text-sm text-slate-300">Upaya scanning terdeteksi</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="px-6 py-5 border-b border-white/10 flex justify-between items-center">
+                        <h3 class="font-bold text-white text-lg">Aktivitas Real-time</h3>
+                        <span class="text-sm text-amber-500 bg-amber-500/10 px-4 py-1 rounded-full border border-amber-500/30 font-bold">LIVE MONITOR</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="table table-zebra w-full">
+                            <thead class="text-slate-200 bg-slate-800/80">
+                                <tr class="text-sm uppercase tracking-wide">
+                                    <th>Timestamp</th>
+                                    <th>IP</th>
+                                    <th>Device</th>
+                                    <th>Action</th>
+                                    <th class="hidden lg:table-cell">Path</th>
+                                    <th class="hidden md:table-cell">Context</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-logs-table">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedules Section -->
+            <div id="schedules-section" class="section-content hidden animate-in fade-in duration-500">
+                <div class="glass-card rounded-2xl overflow-hidden p-4 md:p-6">
+                    <div class="flex flex-col lg:flex-row gap-6 justify-between items-end mb-8 bg-slate-800/30 p-4 rounded-xl border border-white/5">
+                        <div class="flex flex-wrap items-center gap-6 flex-1">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Database</label>
+                                <select id="tableSelector" onchange="loadSchedules()" class="select select-bordered select-sm bg-slate-900 border-white/10 font-bold text-amber-500 w-44">
+                                    <!-- Dynamic Options -->
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Hari</label>
+                                <select id="filterHari" onchange="applyFilters()" class="select select-bordered select-sm bg-slate-900 border-white/10 w-36">
+                                    <option value="">Semua Hari</option>
+                                    <option value="Senin">Senin</option>
+                                    <option value="Selasa">Selasa</option>
+                                    <option value="Rabu">Rabu</option>
+                                    <option value="Kamis">Kamis</option>
+                                    <option value="Jumat">Jumat</option>
+                                    <option value="Sabtu">Sabtu</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Sesi</label>
+                                <select id="filterSesi" onchange="applyFilters()" class="select select-bordered select-sm bg-slate-900 border-white/10 w-32">
+                                    <option value="">Semua Sesi</option>
+                                    <option value="I">Sesi I</option>
+                                    <option value="II">Sesi II</option>
+                                    <option value="III">Sesi III</option>
+                                    <option value="IV">Sesi IV</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-8">
+                            <div class="flex flex-col gap-1 text-right">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mr-1">Summary Result</label>
+                                <div class="h-8 flex items-center">
+                                    <span class="text-base font-bold text-slate-200">
+                                        <span id="scheduleCount" class="text-amber-500 text-xl">0</span> <span class="text-slate-400 text-sm font-medium">records found</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-md rounded-xl shadow-lg shadow-amber-500/20 px-6 font-bold" onclick="toggleModal(true)">
+                                <i class="bi bi-plus-circle-fill text-lg"></i> Tambah Jadwal
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="table table-zebra w-full">
+                            <thead class="bg-slate-800/80 text-slate-200">
+                                <tr class="text-sm">
+                                    <th>Tanggal & Sesi</th>
+                                    <th>Mata Kuliah</th>
+                                    <th class="hidden lg:table-cell">Kelas & Dosen</th>
+                                    <th>Mode</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedules-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Center Section -->
+            <div id="security-section" class="section-content hidden animate-in fade-in duration-500">
+                <div class="glass-card rounded-2xl p-4 md:p-6">
+                    <h3 class="text-xl font-bold text-white mb-6">IP Jail (Blacklist)</h3>
+                    <div class="overflow-x-auto w-full">
+                        <table class="table table-zebra w-full">
+                            <thead class="bg-slate-900/50 text-slate-400">
+                                <tr>
+                                    <th>Target IP</th>
+                                    <th class="hidden md:table-cell">Reason / Pattern</th>
+                                    <th>Location</th>
+                                    <th>Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blacklist-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Logs Section -->
+            <div id="logs-section" class="section-content hidden animate-in fade-in duration-500">
+                <div class="glass-card rounded-2xl p-4 md:p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-white">Master Activity Logs</h3>
+                        <button onclick="clearAllLogs()" class="btn btn-error btn-sm btn-outline font-bold">
+                            <i class="bi bi-trash3-fill"></i> CLEAR ALL LOGS
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="table table-zebra w-full">
+                            <thead class="bg-slate-800/80 text-slate-200">
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Visitor</th>
+                                    <th>Device</th>
+                                    <th>Activity</th>
+                                    <th class="hidden lg:table-cell">Path</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-logs-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Users Section -->
+            <div id="users-section" class="section-content hidden animate-in fade-in duration-500">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-6">System Administrators</h3>
+                        <div class="overflow-x-auto w-full">
+                            <table class="table table-zebra w-full">
+                                <thead class="bg-slate-800/80 text-slate-200">
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Created At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-6 text-amber-500">Create New Admin</h3>
+                        <form id="addUserForm" onsubmit="saveUser(event)" class="space-y-4">
+                            <div class="form-control">
+                                <label class="label"><span class="label-text text-slate-300 font-bold">Username</span></label>
+                                <input type="text" name="username" class="input input-bordered bg-slate-900" required>
+                            </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text text-slate-300 font-bold">Initial Password</span></label>
+                                <input type="password" name="password" class="input input-bordered bg-slate-900" required>
+                            </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text text-slate-300 font-bold">Role</span></label>
+                                <select name="role" class="select select-bordered bg-slate-900">
+                                    <option value="admin">Admin</option>
+                                    <option value="superadmin">Super Admin</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full shadow-lg shadow-amber-500/20 font-bold mt-4">ADD NEW USER</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Tambah Jadwal -->
+    <div id="scheduleModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="glass-card w-full max-w-4xl rounded-2xl p-6 shadow-2xl animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white" id="modalTitle">Input Jadwal UTS</h3>
+                <div class="badge badge-warning font-black text-[10px]">ENTRY FORM</div>
+            </div>
+            
+            <form id="addScheduleForm" onsubmit="saveSchedule(event)" class="space-y-3">
+                <input type="hidden" name="id" id="edit_id">
+                <!-- Baris 1: Waktu & Identitas Dasar -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Hari</span></label>
+                        <select name="hari" class="select select-bordered select-sm bg-slate-900 focus:border-amber-500" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                            <option value="Minggu">Minggu</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Tanggal</span></label>
+                        <input type="text" name="tanggal" class="input input-bordered input-sm bg-slate-900 focus:border-amber-500" placeholder="DD/MM/YYYY" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Sesi</span></label>
+                        <select name="sesi" class="select select-bordered select-sm bg-slate-900 focus:border-amber-500" required>
+                            <option value="I">Sesi I</option>
+                            <option value="II">Sesi II</option>
+                            <option value="III">Sesi III</option>
+                            <option value="IV">Sesi IV</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Baris 2: Detail Matkul -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Mata Kuliah</span></label>
+                    <input type="text" name="matkul" class="input input-bordered input-sm bg-slate-900 focus:border-amber-500 w-full" required>
+                </div>
+
+                <!-- Baris 3: Jam, Prodi & Kelas -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Waktu (Jam)</span></label>
+                        <select name="jam" class="select select-bordered select-sm bg-slate-900 focus:border-amber-500" required>
+                            <option value="">-- Pilih Jam --</option>
+                            <option value="14.00 - 15.00">14.00 - 15.00</option>
+                            <option value="14.00 - 15.20">14.00 - 15.20</option>
+                            <option value="15.30 - 16.30">15.30 - 16.30</option>
+                            <option value="15.40 - 16.40">15.40 - 16.40</option>
+                            <option value="17.30 - 18.30">17.30 - 18.30</option>
+                            <option value="17.45 - 18.45">17.45 - 18.45</option>
+                            <option value="19.20 - 20.20">19.20 - 20.20</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Program Studi</span></label>
+                        <select id="prodiSelect" name="prodi" onchange="filterKelasByProdi()" class="select select-bordered select-sm bg-slate-900 focus:border-amber-500" required>
+                            <option value="">-- Pilih Prodi --</option>
+                            <option value="IF">Informatika (IF)</option>
+                            <option value="AB">Agribisnis (AB)</option>
+                            <option value="MH">Manajemen Hutan (MH)</option>
+                            <option value="KB">Kebidanan (KB)</option>
+                            <option value="BI">Bisnis Digital (BI)</option>
+                            <option value="KW">Kewirausahaan (KW)</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Kelas</span></label>
+                        <select name="kelas" id="kelasSelect" class="select select-bordered select-sm bg-slate-900 focus:border-amber-500" required>
+                            <option value="">-- Pilih Kelas --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Baris 4: Dosen, Ruang & Server -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Dosen Pengampu</span></label>
+                        <input type="text" name="dosen" class="input input-bordered input-sm bg-slate-900 focus:border-amber-500" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Ruang Ujian</span></label>
+                        <input type="text" name="ruang" list="roomList" class="input input-bordered input-sm bg-slate-900 focus:border-amber-500" placeholder="Ketik/Pilih Ruang..." required>
+                        <datalist id="roomList"></datalist>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-slate-300 text-xs font-bold">Mode Server</span></label>
+                        <select name="link_server" class="select select-bordered select-sm bg-slate-900 font-bold text-amber-500 focus:border-amber-500" required>
+                            <option value="OFFLINE">OFFLINE</option>
+                            <option value="https://s1.satyaterrabhinneka.ac.id">ONLINE (Server 1)</option>
+                            <option value="https://s2.satyaterrabhinneka.ac.id">ONLINE (Server 2)</option>
+                            <option value="https://s3.satyaterrabhinneka.ac.id">ONLINE (Server 3)</option>
+                            <option value="https://s4.satyaterrabhinneka.ac.id">ONLINE (Server 4)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="toggleModal(false)" class="btn btn-ghost btn-sm flex-1">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm flex-1 shadow-lg shadow-amber-600/30 font-bold">SIMPAN JADWAL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('adminToken');
+        if (!token) window.location.href = 'index.html';
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/admin/stats', { headers });
+                const data = await res.json();
+                document.getElementById('stat-visitors').innerText = (data.total_visitors || 0).toLocaleString();
+                document.getElementById('stat-blacklisted').innerText = data.total_blacklisted || 0;
+                document.getElementById('stat-intrusions').innerText = data.total_intrusions || 0;
+                
+                const tbody = document.getElementById('recent-logs-table');
+                const actionColors = {
+                    'page_load': 'badge-success', 'tab_click': 'badge-info', 'search': 'badge-warning',
+                    'click_exam_url': 'badge-success', 'click_locked': 'badge-ghost', 'prodi_filter': 'badge-info',
+                    'security_alert': 'badge-error'
+                };
+                tbody.innerHTML = (data.recent_logs || []).map(log => `
+                    <tr class="hover:bg-white/10 transition-colors">
+                        <td class="text-slate-200 text-sm font-medium">${new Date(log.created_at).toLocaleTimeString('id-ID')}</td>
+                        <td class="font-mono font-bold text-amber-500 text-xs">${log.ip_address}</td>
+                        <td class="text-xs text-slate-300"><i class="bi bi-${log.device_type === 'mobile' ? 'phone' : 'laptop'}"></i> ${log.brand || log.device_type || '-'}</td>
+                        <td><span class="badge ${actionColors[log.action] || 'badge-ghost'} text-[10px] font-black uppercase">${log.action}</span></td>
+                        <td class="hidden lg:table-cell text-xs font-mono text-cyan-400 truncate max-w-[100px]">${log.path || '-'}</td>
+                        <td class="hidden md:table-cell text-sm text-slate-200 truncate max-w-[150px]">${log.context || '-'}</td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        let currentSchedules = [];
+
+        async function loadTables() {
+            try {
+                const res = await fetch('/api/admin/tables', { headers });
+                const tables = await res.json();
+                const selector = document.getElementById('tableSelector');
+                selector.innerHTML = tables.map(t => {
+                    const label = t.replace('uts_', 'UTS ').replace('_', ' ').replace('semester', 'Semester').toUpperCase();
+                    return `<option value="${t}">${label}</option>`;
+                }).join('');
+                
+                if (tables.length > 0) loadSchedules();
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadSchedules() {
+            const table = document.getElementById('tableSelector').value;
+            const res = await fetch(`/api/admin/schedules/${table}`, { headers });
+            currentSchedules = await res.json();
+            applyFilters(); // Render filtered results
+        }
+
+        function applyFilters() {
+            const hari = document.getElementById('filterHari').value.toLowerCase();
+            const sesi = document.getElementById('filterSesi').value.toLowerCase();
+            
+            const filtered = currentSchedules.filter(item => {
+                const matchHari = !hari || (item.hari && item.hari.toLowerCase() === hari);
+                const matchSesi = !sesi || (item.sesi && item.sesi.toLowerCase() === sesi);
+                return matchHari && matchSesi;
+            });
+
+            document.getElementById('scheduleCount').innerText = filtered.length;
+            renderSchedulesTable(filtered);
+        }
+
+        function renderSchedulesTable(data) {
+            const tbody = document.getElementById('schedules-table');
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td>
+                        <div class="font-bold text-white text-sm">${item.tanggal}</div>
+                        <div class="text-[12px] text-slate-300 font-mono font-bold">${item.hari || ''} - ${item.jam}</div>
+                    </td>
+                    <td class="font-bold text-amber-400 text-base">${item.matkul}</td>
+                    <td class="hidden lg:table-cell">
+                        <div class="text-sm font-semibold text-white">${item.kelas} (Sesi ${item.sesi || '-'})</div>
+                        <div class="text-[12px] text-amber-500 font-bold"><i class="bi bi-geo-alt"></i> ${item.ruang || '-'}</div>
+                        <div class="text-[13px] text-slate-300 italic">${item.dosen}</div>
+                    </td>
+                    <td>
+                        <div class="badge ${item.link_server === 'OFFLINE' ? 'badge-warning' : 'badge-success'} badge-outline text-[11px] font-black border-2">
+                            ${item.link_server === 'OFFLINE' ? 'OFFLINE' : 'ONLINE'}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <button onclick="editSchedule(${item.id})" class="btn btn-circle btn-ghost btn-sm text-amber-500 hover:bg-amber-500/20">
+                                <i class="bi bi-pencil-square text-lg"></i>
+                            </button>
+                            <button onclick="deleteSchedule(${item.id})" class="btn btn-circle btn-ghost btn-sm text-red-400 hover:bg-red-500/20">
+                                <i class="bi bi-trash-fill text-lg"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editSchedule(id) {
+            const item = currentSchedules.find(s => s.id === id);
+            if (!item) return;
+
+            const form = document.getElementById('addScheduleForm');
+            
+            // Set values with fallbacks and trimming
+            form.id.value = item.id;
+            form.hari.value = item.hari || 'Senin';
+            form.tanggal.value = item.tanggal || '';
+            form.sesi.value = item.sesi || 'I';
+            form.matkul.value = item.matkul || '';
+            form.jam.value = (item.jam || '').trim();
+            form.prodi.value = item.prodi || '';
+            
+            // Re-filter kelas options based on prodi
+            filterKelasByProdi();
+            
+            // Wait a tiny bit for the dropdown to populate then set value
+            setTimeout(() => {
+                form.kelas.value = item.kelas || '';
+            }, 50);
+            
+            form.ruang.value = item.ruang || '';
+            form.dosen.value = item.dosen || '';
+            form.link_server.value = (item.link_server || 'OFFLINE').trim();
+
+            document.getElementById('modalTitle').innerText = "Edit Jadwal UTS";
+            toggleModal(true);
+        }
+
+        async function saveSchedule(e) {
+            e.preventDefault();
+            const table = document.getElementById('tableSelector').value;
+            const formData = new FormData(e.target);
+            const body = Object.fromEntries(formData.entries());
+            const id = body.id;
+
+            const url = id ? `/api/admin/schedules/${table}/${id}` : `/api/admin/schedules/${table}`;
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
+            if (res.ok) { 
+                toggleModal(false); 
+                e.target.reset();
+                document.getElementById('edit_id').value = "";
+                loadSchedules(); 
+                loadRooms();
+            }
+        }
+
+        async function deleteSchedule(id) {
+            if (!confirm("Hapus data jadwal ini? Tindakan ini tidak dapat dibatalkan.")) return;
+            const table = document.getElementById('tableSelector').value;
+            await fetch(`/api/admin/schedules/${table}/${id}`, { method: 'DELETE', headers });
+            loadSchedules();
+        }
+
+        async function loadBlacklist() {
+            const res = await fetch('/api/admin/blacklist', { headers });
+            const data = await res.json();
+            const tbody = document.getElementById('blacklist-table');
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-red-500/10 transition-colors">
+                    <td class="font-mono font-bold text-red-400 text-sm">${item.ip_address}</td>
+                    <td class="text-sm font-semibold text-slate-200 hidden md:table-cell">${item.reason}</td>
+                    <td class="text-sm font-bold text-white"><i class="bi bi-geo-alt text-amber-500"></i> ${item.city}, ${item.country}</td>
+                    <td><div class="badge badge-error font-black text-[11px] uppercase">${item.threat_level}</div></td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadAllLogs() {
+            const res = await fetch('/api/admin/logs', { headers });
+            const data = await res.json();
+            const tbody = document.getElementById('full-logs-table');
+            const actionColors = {
+                'page_load': 'badge-success', 'tab_click': 'badge-info', 'search': 'badge-warning',
+                'click_exam_url': 'badge-success', 'click_locked': 'badge-ghost', 
+                'prodi_filter': 'badge-info', 'date_filter': 'badge-info',
+                'page_exit': 'badge-ghost', 'device_type': 'badge-neutral',
+                'theme_dark': 'badge-neutral', 'theme_light': 'badge-neutral',
+                'security_alert': 'badge-error',
+            };
+            tbody.innerHTML = data.map(log => `
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td class="text-[12px] font-mono text-slate-300 font-bold whitespace-nowrap">${new Date(log.created_at).toLocaleString('id-ID')}</td>
+                    <td>
+                        <div class="font-bold text-white text-sm">${log.ip_address}</div>
+                        <div class="text-[11px] text-slate-400">${log.city || '-'}, ${log.country || '-'}</div>
+                    </td>
+                    <td>
+                        <div class="text-[12px] text-amber-400 font-bold"><i class="bi bi-${log.device_type === 'mobile' ? 'phone' : 'laptop'}"></i> ${log.brand || log.device_type}</div>
+                        <div class="text-[11px] text-slate-400">${log.os || '-'}</div>
+                    </td>
+                    <td>
+                        <div class="badge ${actionColors[log.action] || 'badge-ghost'} text-[10px] font-bold uppercase">${log.action}</div>
+                        ${log.semester ? `<div class="text-[10px] text-slate-400 mt-1">Smt ${log.semester}</div>` : ''}
+                    </td>
+                    <td class="hidden lg:table-cell text-[12px] font-mono text-cyan-400 max-w-xs truncate">${log.path || '-'}</td>
+                    <td>
+                        <button onclick="deleteLog(${log.id})" class="btn btn-circle btn-ghost btn-xs text-red-400 hover:bg-red-500/20">
+                            <i class="bi bi-trash-fill text-lg"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteLog(id) {
+            if (!confirm("Hapus log ini?")) return;
+            try {
+                const res = await fetch(`/api/admin/logs/${id}`, { method: 'DELETE', headers });
+                if (res.ok) {
+                    loadAllLogs();
+                } else {
+                    const data = await res.json();
+                    alert("Gagal menghapus log: " + (data.error || res.statusText));
+                }
+            } catch (e) {
+                alert("Terjadi kesalahan jaringan: " + e.message);
+            }
+        }
+
+        async function clearAllLogs() {
+            if (!confirm("⚠️ PERINGATAN: Hapus SELURUH data log visitor? Tindakan ini tidak bisa dibatalkan!")) return;
+            try {
+                const res = await fetch('/api/admin/logs-clear-all', { method: 'DELETE', headers });
+                if (res.ok) {
+                    loadAllLogs();
+                    alert("Semua log berhasil dihapus!");
+                } else {
+                    const data = await res.json();
+                    alert("Gagal menghapus semua log: " + (data.error || res.statusText));
+                }
+            } catch (e) {
+                alert("Terjadi kesalahan jaringan: " + e.message);
+            }
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users', { headers });
+            const data = await res.json();
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = data.map(u => `
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td class="font-bold text-white text-sm">${u.username}</td>
+                    <td><div class="badge badge-info text-[11px] uppercase font-bold">${u.role}</div></td>
+                    <td class="text-xs text-slate-300 font-mono">${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="deleteUser(${u.id})" class="btn btn-circle btn-ghost btn-xs text-red-400 hover:bg-red-500/20">
+                            <i class="bi bi-trash-fill text-lg"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            const body = Object.fromEntries(new FormData(e.target).entries());
+            const res = await fetch('/api/admin/users', { method: 'POST', headers, body: JSON.stringify(body) });
+            if (res.ok) { e.target.reset(); loadUsers(); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm("Hapus user ini?")) return;
+            await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers });
+            loadUsers();
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            document.getElementById('pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1);
+            
+            document.querySelectorAll('.nav-btn').forEach(i => i.classList.remove('nav-active'));
+            document.getElementById(`nav-${section}`).classList.add('nav-active');
+
+            if (section === 'overview') fetchStats();
+            if (section === 'schedules') loadSchedules();
+            if (section === 'security') loadBlacklist();
+            if (section === 'logs') loadAllLogs();
+            if (section === 'users') loadUsers();
+        }
+
+        function toggleModal(show) { 
+            const modal = document.getElementById('scheduleModal');
+            modal.style.display = show ? 'flex' : 'none'; 
+            if (!show) {
+                document.getElementById('addScheduleForm').reset();
+                document.getElementById('edit_id').value = "";
+                document.getElementById('modalTitle').innerText = "Input Jadwal UTS";
+            }
+        }
+
+        async function syncData() {
+            const btn = event.currentTarget;
+            btn.classList.add('loading');
+            const res = await fetch('/api/sync', { headers });
+            btn.classList.remove('loading');
+            if (res.ok) alert("Data Cache Synchronized Successfully!");
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        let allMasterClasses = [];
+
+        async function loadClasses() {
+            try {
+                const res = await fetch('/api/admin/kelas', { headers });
+                allMasterClasses = await res.json();
+                renderKelasOptions(allMasterClasses);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderKelasOptions(data) {
+            const select = document.getElementById('kelasSelect');
+            select.innerHTML = '<option value="">-- Pilih Kelas --</option>' + 
+                data.map(k => `<option value="${k.nama_kelas}">${k.nama_kelas}</option>`).join('');
+        }
+
+        function filterKelasByProdi() {
+            const prodi = document.getElementById('prodiSelect').value;
+            if (!prodi) {
+                renderKelasOptions(allMasterClasses);
+            } else {
+                const filtered = allMasterClasses.filter(k => k.prodi === prodi);
+                renderKelasOptions(filtered);
+            }
+        }
+
+        async function loadRooms() {
+            try {
+                const res = await fetch('/api/admin/rooms', { headers });
+                const rooms = await res.json();
+                const list = document.getElementById('roomList');
+                list.innerHTML = rooms.map(r => `<option value="${r}">`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadTables() {
+            try {
+                const res = await fetch('/api/admin/tables', { headers });
+                const tables = await res.json();
+                const selector = document.getElementById('tableSelector');
+                selector.innerHTML = tables.map(t => {
+                    // Create pretty label: uts_semester_2 -> UTS SEMESTER 2
+                    const label = t.replace(/_/g, ' ').toUpperCase();
+                    return `<option value="${t}">${label}</option>`;
+                }).join('');
+                
+                // If tables exist, load the first one's data
+                if (tables.length > 0) loadSchedules();
+            } catch (e) { console.error(e); }
+        }
+
+        // Startup
+        fetchStats();
+        loadTables();
+        loadClasses();
+        loadRooms();
+        const role = localStorage.getItem('adminRole');
+        const user = localStorage.getItem('adminUser') || 'Administrator';
+        
+        // Update welcome message
+        document.getElementById('welcomeUser').innerText = user;
+
+        if (role !== 'superadmin') {
+            const userNav = document.getElementById('nav-users');
+            if (userNav) userNav.remove();
+        }
+        document.getElementById('nav-overview').classList.add('nav-active');
+    </script>
+</body>
+</html>

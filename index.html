@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Informasi Jadwal Ujian resmi Universitas Satya Terra Bhinneka. Cek jadwal ujian Semester 2, 4, dan 6 secara real-time.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:image" content="assets/images/logo.png">
+    <title>Jadwal Ujian | ST Bhinneka</title>
+    <link rel="shortcut icon" href="assets/images/favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="assets/css/style.css?v=210421_v2_final">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-main">
+                <div class="header-brand">
+                    <img src="assets/images/logo.png" alt="Logo ST Bhinneka">
+                    <div class="header-text">
+                        <h1>Jadwal Ujian</h1>
+                        <p>Sistem Informasi Jadwal Ujian</p>
+                    </div>
+                </div>
+                <button id="themeToggle" title="Toggle Dark Mode">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+            </div>
+        </header>
+
+
+        <div class="top-utility-bar">
+            <div id="infoHariTanggal" class="glass-card" style="display: none; padding: 0.5rem 1rem; font-weight: 600; color: var(--primary); font-size: 0.85rem;"></div>
+        </div>
+
+        <nav class="nav-tabs" id="semesterTabs">
+            <a href="#" class="nav-link active">Smt -</a>
+        </nav>
+
+        <div class="search-filter-wrapper">
+            <div class="filter-group">
+                <select id="prodiFilter" class="filter-select">
+                    <option value="">Semua Prodi</option>
+                    <option value="IF">Informatika</option>
+                    <option value="AB">Agribisnis</option>
+                    <option value="MH">Manajemen Hutan</option>
+                    <option value="KB">Kebidanan</option>
+                    <option value="BI">Bisnis Digital</option>
+                    <option value="KW">Kewirausahaan</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select id="dateFilter" class="filter-select">
+                    <option value="today">Hari Ini</option>
+                    <option value="all">Semua Jadwal</option>
+                    <!-- Dates will be injected here -->
+                </select>
+            </div>
+            <div class="search-container">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Cari Mata Kuliah, Kelas, atau Dosen...">
+            </div>
+        </div>
+
+
+
+        <div id="tableWrapper" class="glass-card fade-in-up" style="display: none;">
+            <!-- View 1: Desktop Table (Hidden on Mobile via CSS) -->
+            <div id="desktopContainer" class="table-container">
+                <table id="desktopTable">
+                    <thead>
+                        <tr>
+                            <th>Jam & Status</th>
+                            <th>Kelas & Ruang</th>
+                            <th>Mata kuliah</th>
+                            <th>Dosen</th>
+                            <th style="width: 120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopBody"></tbody>
+                </table>
+            </div>
+
+            <!-- View 2: Mobile Card List (Hidden on Desktop via CSS) -->
+            <div id="mobileCardList"></div>
+
+            <div id="noData">
+                <i class="bi bi-calendar-x"></i>
+                <p>Tidak ada jadwal ujian untuk kriteria pencarian ini atau hari ini.</p>
+            </div>
+        </div>
+
+        <p class="refresh-status" id="refreshStatus"></p>
+
+        <footer>
+            &copy; <span id="year"></span> Sistem Informasi Jadwal Ujian – PDSI Universitas Satya Terra Bhinneka
+        </footer>
+    <button id="vFinalScrollTop" class="premium-back-to-top" title="Back to Top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
