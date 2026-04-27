@@ -783,6 +783,17 @@
             if (userNav) userNav.remove();
         }
         document.getElementById('nav-overview').classList.add('nav-active');
+
+        // AUTO-REFRESH LOGS & STATS (REALTIME FEEL)
+        // Refresh every 5 seconds to match or exceed the old PHP system
+        setInterval(() => {
+            try {
+                fetchStats();
+                loadAllLogs();
+            } catch (e) {
+                // Silent fail on network errors during background refresh
+            }
+        }, 5000);
     </script>
 </body>
 </html>
