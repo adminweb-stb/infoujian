@@ -15,6 +15,7 @@ dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1); // Fix untuk proxy Nginx Biznet
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 // Database Connection Pool
