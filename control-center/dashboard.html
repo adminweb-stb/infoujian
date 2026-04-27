@@ -227,8 +227,18 @@
             <!-- Full Logs Section -->
             <div id="logs-section" class="section-content hidden animate-in fade-in duration-500">
                 <div class="glass-card rounded-2xl p-4 md:p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-bold text-white">Master Activity Logs</h3>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <h3 class="text-xl font-bold text-white">Master Activity Logs</h3>
+                            <select id="logActionFilter" class="select select-sm select-bordered bg-slate-800 text-slate-300" onchange="renderMasterLogsTable()">
+                                <option value="all">Semua Aktivitas</option>
+                                <option value="spam">Bot / Spam</option>
+                                <option value="security">Security Alert</option>
+                                <option value="page_load">Page Load</option>
+                                <option value="tab_click">Klik Tab</option>
+                                <option value="filter">Pencarian & Filter</option>
+                            </select>
+                        </div>
                         <button onclick="clearAllLogs()" class="btn btn-error btn-sm btn-outline font-bold">
                             <i class="bi bi-trash3-fill"></i> CLEAR ALL LOGS
                         </button>
@@ -582,9 +592,27 @@
             `).join('');
         }
 
+        let masterLogsData = [];
+
         async function loadAllLogs() {
-            const res = await fetch('/api/admin/logs', { headers });
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/admin/logs', { headers });
+                masterLogsData = await res.json();
+                renderMasterLogsTable();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderMasterLogsTable() {
+            const filterVal = document.getElementById('logActionFilter')?.value || 'all';
+            let data = masterLogsData;
+            
+            if (filterVal === 'spam') data = masterLogsData.filter(log => log.is_bot || log.action === 'spam' || log.action === 'bot_detected');
+            else if (filterVal === 'security') data = masterLogsData.filter(log => log.action === 'security_alert');
+            else if (filterVal === 'filter') data = masterLogsData.filter(log => log.action.includes('filter') || log.action === 'search');
+            else if (filterVal !== 'all') data = masterLogsData.filter(log => log.action === filterVal);
+
             const tbody = document.getElementById('full-logs-table');
             const actionColors = {
                 'page_load': 'badge-success', 'tab_click': 'badge-info', 'search': 'badge-warning',
